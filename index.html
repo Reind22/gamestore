@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameStore — магазин игровых аккаунтов и ключей</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   GameStore — v1.0 «Signal»
+   Магазин своих товаров (не маркетплейс)
+   Палитра: серый #F0F0F0 + лого #00FF00
+   ═══════════════════════════════════════════════ */
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
+
+:root{
+  /* ── Поверхности ── */
+  --bg:        #F0F0F0;   /* фон страницы — RGB 240,240,240 */
+  --paper:     #FFFFFF;
+  --paper-2:   #FAFBFA;
+  --hover-wash:#F0F8F0;   /* светло-зелёная вода, не болотная */
+
+  /* ── Фирменный зелёный ── */
+  --lime:      #00FF00;   /* лого — RGB 0,255,0 */
+  --lime-deep: #0ECC0E;   /* интерактив, цены */
+  --lime-ink:  #053B05;   /* текст на зелёном */
+  --lime-line: #C4ECC4;
+  --lime-glow: rgba(0,220,60,.18);
+
+  /* ── Текст ── */
+  --ink:   #171B17;
+  --ink-2: #545B54;
+  --ink-3: #969E96;
+
+  /* ── Служебные ── */
+  --line:    #E4E7E4;
+  --line-2:  #D8DDD8;
+  --red:     #E5484D;
+  --red-bg:  #FDEDEE;
+  --gold:    #FFD84D;
+
+  --sh-1: 0 1px 2px rgba(23,27,23,.05), 0 3px 12px rgba(23,27,23,.05);
+  --sh-2: 0 12px 32px rgba(23,27,23,.13);
+  --sh-lime: 0 6px 22px var(--lime-glow);
+
+  --r-s: 10px; --r-m: 14px; --r-l: 18px;
+  --ease: cubic-bezier(.22,.75,.28,1);
+}
+
+html { scroll-behavior:smooth }
+body{
+  font-family:'Manrope', system-ui, -apple-system, sans-serif;
+  /* фон: серый с деликатным светло-зелёным дыханием */
+  background:
+    radial-gradient(1100px 500px at 85% -8%, rgba(0,255,0,.045), transparent 62%),
+    radial-gradient(900px 460px at -10% 12%, rgba(0,255,0,.03), transparent 58%),
+    var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit;border:none;background:none;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+img,svg{display:block}
+:focus-visible{outline:2.5px solid var(--lime-deep);outline-offset:2px;border-radius:6px}
+::selection{background:rgba(0,255,0,.32);color:var(--lime-ink)}
+
+/* ── Цена — моно-цифры, чтобы не прыгали ── */
+.money{font-family:'JetBrains Mono',monospace;font-weight:600;letter-spacing:-.4px}
+
+/* ═══════════ HEADER ═══════════ */
+.hdr{
+  position:sticky; top:0; z-index:130;
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(14px) saturate(1.4);
+  -webkit-backdrop-filter:blur(14px) saturate(1.4);
+  border-bottom:1px solid var(--line);
+}
+.hdr::after{ /* зелёная нить прогресса по низу шапки */
+  content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px;
+  background:linear-gradient(90deg, transparent 0%, var(--lime) 18%, var(--lime) 82%, transparent 100%);
+  opacity:.5;
+}
+.hdr__in{
+  max-width:1400px; margin:0 auto;
+  padding:13px 26px;
+  display:flex; align-items:center; gap:18px;
+}
+
+/* Логотип */
+.brand{display:flex;align-items:center;gap:11px;flex-shrink:0;padding:3px 4px 3px 2px;border-radius:12px}
+.brand:hover{background:var(--hover-wash)}
+.brand__mark{
+  width:40px;height:40px;border-radius:12px;position:relative;overflow:hidden;
+  background:linear-gradient(140deg, #7DFF7D 0%, var(--lime) 42%, #00C400 100%);
+  display:grid;place-items:center;
+  box-shadow:0 3px 14px rgba(0,220,60,.4), inset 0 1px 0 rgba(255,255,255,.55);
+}
+.brand__mark svg{width:22px;height:22px;filter:drop-shadow(0 1px 1px rgba(0,60,0,.3))}
+.brand__name{
+  font-size:21px;font-weight:800;letter-spacing:-.7px;line-height:1;
+  background:linear-gradient(120deg, #00D400, #00FF40 55%, #00C800);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.brand__name small{
+  display:block;font-size:9.5px;font-weight:700;letter-spacing:.24em;
+  color:var(--ink-3);-webkit-text-fill-color:var(--ink-3);
+  margin-top:2px;
+}
+
+/* Навигация */
+.nav{display:flex;gap:2px;margin-left:6px}
+.nav a{
+  position:relative;
+  padding:10px 15px;border-radius:11px;
+  font-size:14.5px;font-weight:700;color:var(--ink-2);
+  transition:color .16s, background .16s;
+}
+.nav a:hover{color:var(--ink);background:var(--hover-wash)}
+.nav a.on{color:var(--lime-ink)}
+.nav a.on::after{
+  content:'';position:absolute;left:15px;right:15px;bottom:4px;height:3px;
+  border-radius:2px;background:linear-gradient(90deg,var(--lime),var(--lime-deep));
+}
+
+/* Поиск */
+.find{flex:1;max-width:430px;margin-left:auto;position:relative}
+.find__ico{position:absolute;left:15px;top:50%;translate:0 -50%;width:17px;height:17px;color:var(--ink-3);pointer-events:none}
+.find input{
+  width:100%;height:46px;
+  padding:0 76px 0 43px;
+  border:1.5px solid var(--line-2);border-radius:13px;
+  background:var(--paper);
+  font-size:14px;font-weight:500;
+  transition:border-color .18s, box-shadow .18s, background .18s;
+}
+.find input::placeholder{color:var(--ink-3);font-weight:500}
+.find input:hover{border-color:var(--lime-line)}
+.find input:focus{
+  outline:none;border-color:var(--lime-deep);
+  box-shadow:0 0 0 4px rgba(0,220,60,.12);
+}
+.find kbd{
+  position:absolute;right:12px;top:50%;translate:0 -50%;
+  font-family:'JetBrains Mono';font-size:10.5px;color:var(--ink-3);
+  border:1px solid var(--line-2);border-bottom-width:2px;border-radius:6px;
+  padding:3px 7px;background:var(--bg);
+}
+
+/* Действия */
+.acts{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.knob{
+  position:relative;
+  width:44px;height:44px;border-radius:13px;
+  border:1.5px solid var(--line-2);background:var(--paper);
+  display:grid;place-items:center;color:var(--ink-2);
+  transition:all .18s var(--ease);
+}
+.knob svg{width:19px;height:19px}
+.knob:hover{
+  border-color:var(--lime-deep);color:var(--lime-ink);
+  background:var(--hover-wash);transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,200,60,.16);
+}
+.knob .pip{
+  position:absolute;top:-5px;right:-5px;
+  min-width:19px;height:19px;padding:0 5px;
+  border-radius:10px;background:var(--lime-deep);color:#fff;
+  border:2.5px solid #fff;
+  font-size:10.5px;font-weight:800;display:grid;place-items:center;
+}
+.knob .pip:empty, .knob .pip[data-zero]{display:none}
+.btn-go{
+  height:44px;padding:0 22px;border-radius:13px;
+  background:linear-gradient(140deg,#5CFF5C, var(--lime) 45%, #00D400);
+  color:var(--lime-ink);
+  font-size:14.5px;font-weight:800;letter-spacing:.01em;
+  box-shadow:0 4px 16px rgba(0,220,60,.38), inset 0 1px 0 rgba(255,255,255,.5);
+  transition:all .18s var(--ease);
+}
+.btn-go:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,220,60,.45)}
+.btn-go:active{transform:translateY(0)}
+.btn-burger{display:none}
+
+/* ═══════════ Мобильное меню (весь экран) ═══════════ */
+.veil{
+  position:fixed;inset:0;z-index:190;
+  background:rgba(12,16,12,.5);
+  backdrop-filter:blur(3px);
+  opacity:0;pointer-events:none;transition:opacity .26s;
+}
+.veil.open{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;top:0;right:0;z-index:200;
+  width:min(100vw, 360px);height:100dvh;
+  background:var(--paper);
+  transform:translateX(105%);
+  transition:transform .34s var(--ease);
+  display:flex;flex-direction:column;
+  box-shadow:-18px 0 60px rgba(0,0,0,.2);
+  visibility:hidden;
+}
+.sheet.open{transform:translateX(0);visibility:visible}
+.sheet__top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:15px 18px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(0,255,0,.05), transparent);
+}
+.sheet__ttl{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2)}
+.sheet__x{
+  width:40px;height:40px;border-radius:11px;
+  border:1.5px solid var(--line-2);background:var(--paper-2);
+  display:grid;place-items:center;color:var(--ink-2);
+  transition:.16s;
+}
+.sheet__x:hover{border-color:var(--red);color:var(--red);background:var(--red-bg);transform:rotate(90deg)}
+.sheet__body{flex:1;overflow-y:auto;padding:16px}
+.sheet__foot{padding:14px 18px;border-top:1px solid var(--line)}
+.sheet__foot .btn-go{width:100%}
+
+/* ═══════════ КАРКАС ═══════════ */
+.frame{
+  max-width:1400px;margin:0 auto;
+  display:grid;grid-template-columns:266px minmax(0,1fr);
+  gap:26px;
+  padding:26px 26px 64px;
+  align-items:start;
+}
+
+/* ═══════════ ФИЛЬТРЫ ═══════════ */
+.rail{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:var(--r-l);
+  box-shadow:var(--sh-1);
+  position:sticky;top:92px;
+  padding:20px 16px 14px;
+  max-height:calc(100dvh - 112px);
+  overflow-y:auto;
+  scrollbar-width:thin;
+  scrollbar-color:var(--line-2) transparent;
+}
+.rail__ttl{
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:11.5px;font-weight:800;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--ink-3);
+  padding:0 4px 14px;
+}
+.rail__clear{
+  font-size:11px;font-weight:800;color:var(--ink-3);
+  letter-spacing:.06em;padding:4px 9px;border-radius:8px;
+  transition:.15s;
+}
+.rail__clear:hover{color:var(--red);background:var(--red-bg)}
+
+.fam{border-top:1px solid var(--line)}
+.fam__btn{
+  width:100%;
+  display:flex;align-items:center;gap:9px;
+  padding:13px 6px;
+  font-size:14px;font-weight:800;color:var(--ink);
+  transition:.15s;
+}
+.fam__btn:hover{color:var(--lime-deep)}
+.fam__btn .dot{
+  min-width:21px;height:21px;border-radius:7px;
+  background:var(--lime);color:var(--lime-ink);
+  font-size:10.5px;font-weight:800;display:grid;place-items:center;
+  box-shadow:0 2px 6px rgba(0,220,60,.3);
+}
+.fam__btn .chev{
+  margin-left:auto;width:24px;height:24px;border-radius:7px;
+  display:grid;place-items:center;
+  color:var(--ink-3);font-size:10px;
+  transition:transform .28s var(--ease);
+}
+.fam.open .fam__btn .chev{transform:rotate(-180deg)}
+.fam__pan{
+  display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .3s var(--ease);
+}
+.fam.open .fam__pan{grid-template-rows:1fr}
+.fam__pan>div{overflow:hidden}
+.fam__list{padding:2px 4px 14px;display:flex;flex-direction:column;gap:2px}
+
+.chip{
+  display:flex;align-items:center;gap:10px;
+  padding:8.5px 10px;border-radius:10px;
+  cursor:pointer;user-select:none;
+  transition:background .15s;
+}
+.chip:hover{background:var(--hover-wash)}
+.chip__box{
+  width:19px;height:19px;flex-shrink:0;
+  border:1.8px solid var(--line-2);border-radius:6px;
+  background:#fff;display:grid;place-items:center;
+  transition:all .18s var(--ease);
+}
+.chip__box svg{width:11px;height:11px;stroke:var(--lime-ink);stroke-width:3.6;opacity:0;transform:scale(.4);transition:.18s var(--ease)}
+.chip.on .chip__box{background:var(--lime);border-color:var(--lime-deep);box-shadow:0 2px 8px rgba(0,220,60,.35)}
+.chip.on .chip__box svg{opacity:1;transform:scale(1)}
+.chip__lbl{flex:1;font-size:13.5px;font-weight:600;color:var(--ink-2);transition:color .15s}
+.chip.on .chip__lbl{color:var(--lime-ink);font-weight:800}
+.chip__n{
+  font-size:11px;font-weight:700;color:var(--ink-3);
+  background:var(--bg);border-radius:99px;padding:2.5px 8px;
+  font-variant-numeric:tabular-nums;
+}
+.chip.on .chip__n{background:rgba(0,210,60,.14);color:var(--lime-deep)}
+
+.prange{display:flex;align-items:center;gap:7px;padding:6px 4px 10px}
+.prange input{
+  flex:1;min-width:0;height:40px;padding:0 12px;
+  border:1.5px solid var(--line-2);border-radius:10px;
+  background:var(--bg);font-size:13px;font-weight:600;
+  transition:.16s;
+}
+.prange input::placeholder{color:var(--ink-3);font-weight:500}
+.prange input:focus{outline:none;border-color:var(--lime-deep);background:#fff;box-shadow:0 0 0 3px rgba(0,220,60,.1)}
+.prange span{color:var(--ink-3);font-weight:700}
+
+/* ═══════════ ТУЛБАР / СОРТИРОВКА ═══════════ */
+.deck{min-width:0}
+.bar{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:14px;margin-bottom:22px;
+}
+.bar__count{font-size:13.5px;font-weight:700;color:var(--ink-3)}
+.bar__count b{color:var(--ink);font-weight:800}
+
+.sort{position:relative}
+.sort__btn{
+  display:flex;align-items:center;gap:9px;
+  height:46px;padding:0 18px;
+  background:var(--paper);
+  border:1.5px solid var(--line-2);border-radius:13px;
+  font-size:14px;font-weight:700;color:var(--ink);
+  box-shadow:var(--sh-1);
+  transition:.18s var(--ease);
+}
+.sort__btn em{font-style:normal;color:var(--ink-3);font-weight:600}
+.sort__btn:hover{border-color:var(--lime-deep)}
+.sort.open .sort__btn{border-color:var(--lime-deep);box-shadow:0 0 0 4px rgba(0,220,60,.1)}
+.sort__btn .car{font-size:10px;color:var(--ink-3);transition:transform .25s var(--ease)}
+.sort.open .sort__btn .car{transform:rotate(-180deg);color:var(--lime-deep)}
+
+.sort__pop{
+  position:absolute;top:calc(100% + 9px);right:0;z-index:70;
+  min-width:246px;padding:7px;
+  background:var(--paper);
+  border:1px solid var(--line);border-radius:16px;
+  box-shadow:var(--sh-2);
+  opacity:0;pointer-events:none;
+  transform:translateY(-7px) scale(.98);
+  transform-origin:top right;
+  transition:all .2s var(--ease);
+}
+.sort.open .sort__pop{opacity:1;pointer-events:auto;transform:none}
+.sort__it{
+  width:100%;text-align:left;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10.5px 13px;border-radius:10px;
+  font-size:13.5px;font-weight:600;color:var(--ink-2);
+  transition:.13s;
+}
+.sort__it:hover{background:var(--hover-wash);color:var(--ink)}
+.sort__it.on{background:linear-gradient(90deg, rgba(0,255,0,.17), rgba(0,255,0,.07));color:var(--lime-ink);font-weight:800}
+.sort__it .tick{font-size:12px;color:var(--lime-deep);opacity:0;transition:.13s}
+.sort__it.on .tick{opacity:1}
+
+/* ═══════════ ПОЛКИ (3 линии) ═══════════ */
+.shelf{margin-bottom:46px}
+.shelf:last-of-type{margin-bottom:0}
+
+.shelf__head{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  gap:16px;margin-bottom:16px;
+}
+.shelf__name{display:flex;align-items:center;gap:11px}
+.shelf__name .emo{
+  width:38px;height:38px;border-radius:12px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  display:grid;place-items:center;font-size:19px;
+  box-shadow:var(--sh-1);
+}
+.shelf__name h2{
+  font-size:21px;font-weight:800;letter-spacing:-.4px;
+}
+.shelf__name p{font-size:12px;font-weight:600;color:var(--ink-3);margin-top:1px}
+.shelf__more{
+  display:inline-flex;align-items:center;gap:7px;
+  height:38px;padding:0 16px 0 18px;
+  border-radius:11px;border:1.5px solid var(--line-2);
+  background:var(--paper);
+  font-size:13px;font-weight:800;color:var(--lime-deep);
+  transition:all .18s var(--ease);
+}
+.shelf__more .arr{transition:transform .2s var(--ease)}
+.shelf__more:hover{
+  border-color:var(--lime-deep);background:var(--hover-wash);
+  transform:translateX(2px);box-shadow:0 3px 12px rgba(0,200,60,.15);
+}
+.shelf__more:hover .arr{transform:translateX(3px)}
+
+/* ═══════════ КАРТОЧКИ ═══════════ */
+.row{
+  display:grid;
+  grid-template-columns:repeat(5, minmax(0,1fr));
+  gap:15px;
+}
+
+.item{
+  position:relative;
+  background:var(--paper);
+  border:1.5px solid transparent;
+  border-radius:var(--r-m);
+  box-shadow:var(--sh-1);
+  overflow:hidden;
+  cursor:pointer;
+  transition:transform .24s var(--ease), box-shadow .24s, border-color .24s;
+}
+.item::before{ /* зелёная подсветка сверху при ховере */
+  content:'';position:absolute;top:0;left:12%;right:12%;height:2.5px;
+  border-radius:0 0 4px 4px;
+  background:linear-gradient(90deg, transparent, var(--lime), transparent);
+  opacity:0;transition:opacity .24s;
+}
+.item:hover{transform:translateY(-5px);box-shadow:0 16px 36px rgba(0,170,50,.16);border-color:var(--lime-line)}
+.item:hover::before{opacity:1}
+
+.item__pic{
+  position:relative;
+  aspect-ratio:16/10;
+  background:
+    radial-gradient(120% 130% at 20% 0%, rgba(255,255,255,.65), transparent 55%),
+    linear-gradient(135deg, #ECF7EC 0%, #D8EFD8 100%);
+  display:grid;place-items:center;
+  overflow:hidden;
+}
+.item__pic::after{ /* лёгкая сетка-текстура */
+  content:'';position:absolute;inset:0;opacity:.5;
+  background-image:radial-gradient(rgba(0,140,0,.07) 1px, transparent 1.5px);
+  background-size:14px 14px;
+}
+.item__glyph{font-size:46px;position:relative;z-index:1;filter:drop-shadow(0 4px 8px rgba(0,70,0,.16));transition:transform .32s var(--ease)}
+.item:hover .item__glyph{transform:scale(1.12) rotate(-3deg)}
+.item__plat{
+  position:absolute;left:10px;bottom:10px;z-index:2;
+  font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  padding:4px 9px;border-radius:8px;
+  background:rgba(255,255,255,.94);
+  color:var(--ink-2);
+  box-shadow:0 1px 5px rgba(0,0,0,.09);
+}
+.tag{
+  position:absolute;top:10px;left:10px;z-index:2;
+  font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  padding:4.5px 10px;border-radius:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+.tag--new{background:var(--lime);color:var(--lime-ink)}
+.tag--hot{background:var(--red);color:#fff}
+.tag--cut{background:var(--red);color:#fff}
+
+/* Звезда желаемого — как в Steam */
+.star{
+  position:absolute;top:9px;right:9px;z-index:3;
+  width:33px;height:33px;border-radius:50%;
+  background:rgba(255,255,255,.95);
+  box-shadow:0 2px 10px rgba(0,0,0,.14), inset 0 1px 0 #fff;
+  display:grid;place-items:center;
+  font-size:16.5px;line-height:1;color:#889488;
+  transition:all .2s var(--ease);
+}
+.star:hover{transform:scale(1.14);background:#FFF7DC;color:#C89B00}
+.star.on{background:var(--gold);color:#7A5A00;box-shadow:0 2px 12px rgba(230,180,20,.5)}
+.star.on:hover{background:#FFCB1E}
+
+.item__info{padding:13px 14px 14px}
+.item__name{
+  font-size:13.5px;font-weight:800;line-height:1.4;letter-spacing:-.1px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  min-height:38px;margin-bottom:10px;
+  transition:color .16s;
+}
+.item:hover .item__name{color:var(--lime-deep)}
+.item__sub{
+  display:flex;align-items:center;gap:8px;margin-bottom:11px;
+  font-size:11.5px;font-weight:700;color:var(--ink-3);
+}
+.item__sub .dots{color:var(--lime-deep)}
+.item__buy{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.price{display:flex;flex-direction:column;gap:2px}
+.price__now{font-size:17px;color:var(--lime-deep)}
+.price__was{font-size:11px;font-weight:600;color:var(--ink-3);text-decoration:line-through}
+.price__was b{color:var(--red);text-decoration:none;font-weight:800;margin-right:4px}
+.tocart{
+  width:36px;height:36px;flex-shrink:0;border-radius:11px;
+  background:var(--hover-wash);color:var(--lime-deep);
+  border:1.5px solid transparent;
+  display:grid;place-items:center;
+  transition:all .18s var(--ease);
+}
+.tocart svg{width:16px;height:16px}
+.tocart:hover{
+  background:var(--lime);color:var(--lime-ink);
+  transform:scale(1.08);box-shadow:0 3px 12px rgba(0,220,60,.4);
+}
+.tocart:active{transform:scale(.94)}
+
+/* ═══════════ ПАГИНАЦИЯ ═══════════ */
+.pages{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  margin-top:48px;
+}
+.pg{
+  min-width:43px;height:43px;padding:0 8px;
+  border-radius:12px;border:1.5px solid var(--line-2);
+  background:var(--paper);
+  font-size:13.5px;font-weight:800;color:var(--ink-2);
+  transition:all .16s var(--ease);
+}
+.pg:hover{border-color:var(--lime-deep);color:var(--lime-ink);background:var(--hover-wash)}
+.pg.on{
+  background:linear-gradient(140deg,#5CFF5C,var(--lime) 50%,#00D400);
+  border-color:var(--lime-deep);color:var(--lime-ink);
+  box-shadow:0 3px 12px rgba(0,220,60,.35);
+}
+.pg.etc{border:none;background:none;cursor:default;color:var(--ink-3)}
+.pg.etc:hover{background:none;color:var(--ink-3)}
+
+/* ═══════════ ФУТЕР ═══════════ */
+.ftr{
+  border-top:1px solid var(--line);
+  background:var(--paper);
+  margin-top:10px;
+}
+.ftr__in{
+  max-width:1400px;margin:0 auto;padding:34px 26px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:22px;flex-wrap:wrap;
+}
+.ftr__brand{display:flex;align-items:center;gap:9px}
+.ftr__brand .brand__mark{width:30px;height:30px;border-radius:9px}
+.ftr__brand .brand__mark svg{width:16px;height:16px}
+.ftr__brand b{font-size:15px;font-weight:800;color:var(--lime-deep)}
+.ftr__note{font-size:12.5px;color:var(--ink-3);font-weight:600}
+.ftr__nav{display:flex;gap:22px;flex-wrap:wrap}
+.ftr__nav a{font-size:13px;font-weight:700;color:var(--ink-2);transition:.15s}
+.ftr__nav a:hover{color:var(--lime-deep)}
+
+/* ═══════════ TOAST ═══════════ */
+.toast{
+  position:fixed;left:50%;bottom:28px;z-index:400;
+  translate:-50% 16px;
+  display:flex;align-items:center;gap:10px;
+  background:var(--ink);color:#fff;
+  padding:13px 20px;border-radius:14px;
+  font-size:13.5px;font-weight:700;
+  box-shadow:var(--sh-2);
+  opacity:0;pointer-events:none;
+  transition:all .28s var(--ease);
+}
+.toast.show{opacity:1;translate:-50% 0}
+.toast .s{color:var(--gold);font-size:15px}
+
+/* ═══════════ АДАПТИВ ═══════════ */
+@media (max-width:1250px){ .row{grid-template-columns:repeat(4,minmax(0,1fr))} }
+@media (max-width:1040px){
+  .row{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .nav{display:none}
+  .frame{grid-template-columns:242px minmax(0,1fr);gap:20px;padding:22px 18px 56px}
+  .find kbd{display:none}
+}
+@media (max-width:840px){
+  .frame{grid-template-columns:minmax(0,1fr);padding:18px 14px 52px}
+  .rail{display:none}                 /* сайдбар скрыт */
+  .find{display:none}
+  .btn-go{display:none}
+  .btn-burger{
+    display:grid;place-items:center;
+    width:44px;height:44px;border-radius:13px;
+    border:1.5px solid var(--line-2);background:var(--paper);
+    color:var(--ink-2);transition:.16s;
+  }
+  .btn-burger:hover{border-color:var(--lime-deep);color:var(--lime-ink)}
+  .bar{margin-bottom:18px}
+  .shelf{margin-bottom:36px}
+  .shelf__name h2{font-size:17.5px}
+  .shelf__name .emo{width:33px;height:33px;font-size:16px}
+}
+@media (max-width:620px){
+  .row{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+  .item__name{font-size:12.5px;min-height:35px}
+  .price__now{font-size:15.5px}
+  .hdr__in{padding:11px 14px;gap:11px}
+  .brand__name{font-size:18px}
+  .brand__mark{width:35px;height:35px}
+  .shelf__more{height:34px;padding:0 12px;font-size:12px}
+  /* Сортировка на мобильном: без префикса, без переносов */
+  .bar{flex-wrap:wrap}
+  .bar__count{width:100%}
+  .sort{width:100%}
+  .sort__btn{width:100%;justify-content:space-between}
+  .sort__btn em{display:none}
+  .sort__pop{left:0;right:auto;min-width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ ШАПКА ═══════════ -->
+<header class="hdr">
+  <div class="hdr__in">
+
+    <a class="brand" href="#" aria-label="GameStore">
+      <span class="brand__mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#053B05" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 11.5h4M8 9.5v4"/>
+          <circle cx="15.2" cy="10.7" r=".9" fill="#053B05" stroke="none"/>
+          <circle cx="17.8" cy="12.7" r=".9" fill="#053B05" stroke="none"/>
+          <path d="M17.3 5.5H6.7a4 4 0 0 0-3.97 3.56c-.27 2.1-.45 4.3-.45 5.5 0 2.62 1.6 3.97 3.86 3.97 1.28 0 2.23-.56 3-1.32l.9-.9a2.6 2.6 0 0 1 3.9.02l.88.9c.78.76 1.72 1.3 3 1.3 2.26 0 3.86-1.35 3.86-3.97 0-1.2-.18-3.4-.45-5.5A4 4 0 0 0 17.3 5.5z"/>
+        </svg>
+      </span>
+      <span class="brand__name">GameStore<small>ЭКСКЛЮЗИВНЫЕ АККАУНТЫ</small></span>
+    </a>
+
+    <nav class="nav" aria-label="Разделы">
+      <a class="on" href="#">Каталог</a>
+      <a href="#">Акции</a>
+      <a href="#">Помощь</a>
+    </nav>
+
+    <div class="find">
+      <svg class="find__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20.2 20.2-3.7-3.7"/></svg>
+      <input type="search" placeholder="Найти аккаунт, игру или ключ…" aria-label="Поиск">
+      <kbd>Ctrl K</kbd>
+    </div>
+
+    <div class="acts">
+      <button class="knob" id="heartBtn" aria-label="Желаемое">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.5-1.5 2-3.1 2-4.6A4.4 4.4 0 0 0 16.6 5c-1.7 0-3 .9-4.6 2.6C10.4 5.9 9.1 5 7.4 5A4.4 4.4 0 0 0 3 9.4c0 1.5.5 3.1 2 4.6l7 7z"/></svg>
+        <span class="pip" id="heartPip">0</span>
+      </button>
+      <button class="knob" aria-label="Корзина">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9.3" cy="19.8" r="1.5"/><circle cx="17" cy="19.8" r="1.5"/><path d="M3.2 4h2.4l2.2 11.1a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21.3 8H6.1"/></svg>
+        <span class="pip">2</span>
+      </button>
+      <button class="btn-go">Войти</button>
+      <button class="btn-burger" id="burger" aria-label="Фильтры" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ МОБИЛЬНАЯ ПАНЕЛЬ (весь экран) ═══════════ -->
+<div class="veil" id="veil"></div>
+<aside class="sheet" id="sheet" aria-hidden="true">
+  <div class="sheet__top">
+    <span class="sheet__ttl">Фильтры</span>
+    <button class="sheet__x" id="sheetX" aria-label="Закрыть">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5.5 5.5l13 13M18.5 5.5l-13 13"/></svg>
+    </button>
+  </div>
+  <div class="sheet__body" id="sheetBody"></div>
+  <div class="sheet__foot"><button class="btn-go">Показать результаты</button></div>
+</aside>
+
+<!-- ═══════════ КАРКАС ═══════════ -->
+<div class="frame">
+
+  <!-- ── САЙДБАР ФИЛЬТРОВ ── -->
+  <aside class="rail" id="rail" aria-label="Фильтры">
+    <div class="rail__ttl">Фильтры <button class="rail__clear" id="railClear">Сбросить</button></div>
+
+    <section class="fam open">
+      <button class="fam__btn">Платформа <span class="chev">▼</span></button>
+      <div class="fam__pan"><div><div class="fam__list">
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Steam</span><span class="chip__n">124</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Epic Games</span><span class="chip__n">86</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">PlayStation</span><span class="chip__n">43</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Xbox</span><span class="chip__n">31</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Nintendo</span><span class="chip__n">18</span></label>
+      </div></div></div>
+    </section>
+
+    <section class="fam">
+      <button class="fam__btn">Жанр <span class="chev">▼</span></button>
+      <div class="fam__pan"><div><div class="fam__list">
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Шутеры</span><span class="chip__n">89</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">MOBA</span><span class="chip__n">45</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">RPG</span><span class="chip__n">67</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Симуляторы</span><span class="chip__n">34</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Стратегии</span><span class="chip__n">28</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Гонки</span><span class="chip__n">22</span></label>
+      </div></div></div>
+    </section>
+
+    <section class="fam">
+      <button class="fam__btn">Игра <span class="chev">▼</span></button>
+      <div class="fam__pan"><div><div class="fam__list">
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Counter-Strike 2</span><span class="chip__n">56</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Dota 2</span><span class="chip__n">43</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Fortnite</span><span class="chip__n">34</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Apex Legends</span><span class="chip__n">23</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Valorant</span><span class="chip__n">19</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">GTA V</span><span class="chip__n">16</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Rust</span><span class="chip__n">12</span></label>
+      </div></div></div>
+    </section>
+
+    <section class="fam open">
+      <button class="fam__btn">Цена <span class="chev">▼</span></button>
+      <div class="fam__pan"><div><div class="fam__list">
+        <div class="prange">
+          <input type="number" inputmode="numeric" placeholder="От" aria-label="Цена от">
+          <span>—</span>
+          <input type="number" inputmode="numeric" placeholder="До" aria-label="Цена до">
+        </div>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">До 500 ₽</span><span class="chip__n">45</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">500 – 1 000 ₽</span><span class="chip__n">67</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">1 000 – 2 000 ₽</span><span class="chip__n">43</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Более 2 000 ₽</span><span class="chip__n">23</span></label>
+      </div></div></div>
+    </section>
+
+    <section class="fam">
+      <button class="fam__btn">Тип аккаунта <span class="chev">▼</span></button>
+      <div class="fam__pan"><div><div class="fam__list">
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">С играми</span><span class="chip__n">156</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Пустой</span><span class="chip__n">43</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Со скинами</span><span class="chip__n">87</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">С рангом</span><span class="chip__n">65</span></label>
+      </div></div></div>
+    </section>
+
+    <section class="fam">
+      <button class="fam__btn">Регион <span class="chev">▼</span></button>
+      <div class="fam__pan"><div><div class="fam__list">
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Россия</span><span class="chip__n">234</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">СНГ</span><span class="chip__n">123</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Европа</span><span class="chip__n">87</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Другое</span><span class="chip__n">32</span></label>
+      </div></div></div>
+    </section>
+  </aside>
+
+  <!-- ── КОНТЕНТ ── -->
+  <main class="deck">
+
+    <!-- Тулбар: счётчик + сортировка справа в углу -->
+    <div class="bar">
+      <span class="bar__count">Найдено <b>302</b> товара</span>
+      <div class="sort" id="sort">
+        <button class="sort__btn" aria-haspopup="listbox" aria-expanded="false">
+          <em>Сортировка:</em>
+          <span id="sortNow">По популярности</span>
+          <span class="car">▼</span>
+        </button>
+        <div class="sort__pop" role="listbox">
+          <button class="sort__it on" data-k="popular">По популярности <span class="tick">✓</span></button>
+          <button class="sort__it" data-k="cheap">Сначала дешёвые <span class="tick">✓</span></button>
+          <button class="sort__it" data-k="expensive">Сначала дорогие <span class="tick">✓</span></button>
+          <button class="sort__it" data-k="rating">По рейтингу <span class="tick">✓</span></button>
+          <button class="sort__it" data-k="new">По новизне <span class="tick">✓</span></button>
+          <button class="sort__it" data-k="updated">Недавно обновлённые <span class="tick">✓</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ПОЛКА 1: НОВИНКИ -->
+    <section class="shelf">
+      <div class="shelf__head">
+        <div class="shelf__name">
+          <span class="emo">🆕</span>
+          <div><h2>Новинки</h2><p>Только что добавили в магазин</p></div>
+        </div>
+        <a class="shelf__more" href="#" data-goto="new">Смотреть все <span class="arr">→</span></a>
+      </div>
+      <div class="row">
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">🎮</span><span class="tag tag--new">New</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Steam</span></div>
+          <div class="item__info">
+            <h3 class="item__name">Аккаунт Steam + 50 игр (CS2, GTA, Rust)</h3>
+            <div class="item__sub"><span class="dots">●</span>24 игры · 340 ч наиграно</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">2 499 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">🎯</span><span class="tag tag--new">New</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Steam</span></div>
+          <div class="item__info">
+            <h3 class="item__name">CS2 Prime + набор редких скинов</h3>
+            <div class="item__sub"><span class="dots">●</span>Prime · 12 скинов</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">1 299 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">🏆</span><span class="tag tag--new">New</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Epic Games</span></div>
+          <div class="item__info">
+            <h3 class="item__name">Epic Games + Fortnite со скинами</h3>
+            <div class="item__sub"><span class="dots">●</span>Батл-пасс активен</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">899 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">⚔️</span><span class="tag tag--new">New</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Steam</span></div>
+          <div class="item__info">
+            <h3 class="item__name">Dota 2 — аккаунт Immortal</h3>
+            <div class="item__sub"><span class="dots">●</span>Ранг Immortal · 6 200 MMR</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">3 499 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">🔫</span><span class="tag tag--new">New</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Riot</span></div>
+          <div class="item__info">
+            <h3 class="item__name">Valorant — все агенты открыты</h3>
+            <div class="item__sub"><span class="dots">●</span>23 агента · 5 скинов</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">1 799 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ПОЛКА 2: ПОПУЛЯРНОЕ -->
+    <section class="shelf">
+      <div class="shelf__head">
+        <div class="shelf__name">
+          <span class="emo">🔥</span>
+          <div><h2>Популярное</h2><p>Покупают чаще всего</p></div>
+        </div>
+        <a class="shelf__more" href="#" data-goto="popular">Смотреть все <span class="arr">→</span></a>
+      </div>
+      <div class="row">
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">🚗</span><span class="tag tag--hot">Hot</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Rockstar</span></div>
+          <div class="item__info">
+            <h3 class="item__name">GTA V Premium + деньги в Online</h3>
+            <div class="item__sub"><span class="dots">●</span>$10M GTA$ включено</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">1 599 ₽</span><span class="price__was"><b>−36%</b> 2 499 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">⛏️</span><span class="tag tag--hot">Hot</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Steam</span></div>
+          <div class="item__info">
+            <h3 class="item__name">Rust + все DLC</h3>
+            <div class="item__sub"><span class="dots">●</span>4200+ часов · 15 скинов</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">2 199 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">🎭</span><span class="tag tag--cut">−33%</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Origin</span></div>
+          <div class="item__info">
+            <h3 class="item__name">Apex Legends + скины легенд</h3>
+            <div class="item__sub"><span class="dots">●</span>Ранг Diamond · 19 легенд</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">999 ₽</span><span class="price__was"><b>−33%</b> 1 499 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">🏰</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Mojang</span></div>
+          <div class="item__info">
+            <h3 class="item__name">Minecraft Java + Bedrock</h3>
+            <div class="item__sub"><span class="dots">●</span>Полный доступ · смена ника</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">1 199 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">⚽</span><span class="tag tag--hot">Hot</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">EA</span></div>
+          <div class="item__info">
+            <h3 class="item__name">FC 24 + Ultimate Team</h3>
+            <div class="item__sub"><span class="dots">●</span>850K монет на балансе</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">2 899 ₽</span><span class="price__was"><b>−28%</b> 3 999 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ПОЛКА 3: НЕДАВНО ОБНОВЛЕНО -->
+    <section class="shelf">
+      <div class="shelf__head">
+        <div class="shelf__name">
+          <span class="emo">🔄</span>
+          <div><h2>Недавно обновлено</h2><p>Обновили описание или цены</p></div>
+        </div>
+        <a class="shelf__more" href="#" data-goto="updated">Смотреть все <span class="arr">→</span></a>
+      </div>
+      <div class="row">
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">🗡️</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Steam</span></div>
+          <div class="item__info">
+            <h3 class="item__name">The Witcher 3 Complete Edition</h3>
+            <div class="item__sub"><span class="dots">●</span>Все DLC · 118 ч наиграно</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">799 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">🌐</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Steam</span></div>
+          <div class="item__info">
+            <h3 class="item__name">Cyberpunk 2077 + Phantom Liberty</h3>
+            <div class="item__sub"><span class="dots">●</span>DLC активировано</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">1 499 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">🐉</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Steam</span></div>
+          <div class="item__info">
+            <h3 class="item__name">Baldur's Gate 3</h3>
+            <div class="item__sub"><span class="dots">●</span>Цифровое издание Deluxe</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">2 999 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">🚀</span><span class="tag tag--cut">−27%</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Xbox</span></div>
+          <div class="item__info">
+            <h3 class="item__name">Starfield Premium Edition</h3>
+            <div class="item__sub"><span class="dots">●</span>Game Pass не привязан</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">3 499 ₽</span><span class="price__was"><b>−27%</b> 4 799 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+        <article class="item">
+          <div class="item__pic"><span class="item__glyph">🏴‍☠️</span><button class="star" aria-label="В желаемое">☆</button><span class="item__plat">Ubisoft</span></div>
+          <div class="item__info">
+            <h3 class="item__name">Skull and Bones</h3>
+            <div class="item__sub"><span class="dots">●</span>Почта сменяемая</div>
+            <div class="item__buy">
+              <div class="price"><span class="price__now money">2 199 ₽</span></div>
+              <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Пагинация -->
+    <nav class="pages" aria-label="Страницы">
+      <button class="pg" aria-label="Назад">←</button>
+      <button class="pg on">1</button>
+      <button class="pg">2</button>
+      <button class="pg">3</button>
+      <button class="pg">4</button>
+      <span class="pg etc">…</span>
+      <button class="pg">21</button>
+      <button class="pg" aria-label="Вперёд">→</button>
+    </nav>
+  </main>
+</div>
+
+<!-- ═══════════ ФУТЕР ═══════════ -->
+<footer class="ftr">
+  <div class="ftr__in">
+    <div>
+      <div class="ftr__brand">
+        <span class="brand__mark"><svg viewBox="0 0 24 24" fill="none" stroke="#053B05" stroke-width="2.1" stroke-linecap="round"><path d="M6 11.5h4M8 9.5v4"/><path d="M17.3 5.5H6.7a4 4 0 0 0-3.97 3.56c-.27 2.1-.45 4.3-.45 5.5 0 2.62 1.6 3.97 3.86 3.97 1.28 0 2.23-.56 3-1.32l.9-.9a2.6 2.6 0 0 1 3.9.02l.88.9c.78.76 1.72 1.3 3 1.3 2.26 0 3.86-1.35 3.86-3.97 0-1.2-.18-3.4-.45-5.5A4 4 0 0 0 17.3 5.5z"/></svg></span>
+        <b>GameStore</b>
+      </div>
+      <p class="ftr__note" style="margin-top:8px">© 2026 GameStore — магазин игровых аккаунтов и ключей.<br>Все торговые марки принадлежат их владельцам.</p>
+    </div>
+    <nav class="ftr__nav">
+      <a href="#">О магазине</a>
+      <a href="#">Гарантии</a>
+      <a href="#">Оплата</a>
+      <a href="#">Поддержка</a>
+    </nav>
+  </div>
+</footer>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status"><span class="s">★</span><span id="toastMsg">Добавлено в желаемое</span></div>
+
+<script>
+(() => {
+  /* ── Сортировка: dropdown справа в углу ── */
+  const sort = document.getElementById('sort');
+  const btn  = sort.querySelector('.sort__btn');
+  const now  = document.getElementById('sortNow');
+
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = sort.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+  });
+  document.addEventListener('click', e => {
+    if (!sort.contains(e.target)) { sort.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+  });
+  sort.querySelectorAll('.sort__it').forEach(it => it.addEventListener('click', () => {
+    sort.querySelectorAll('.sort__it').forEach(o => o.classList.remove('on'));
+    it.classList.add('on');
+    now.textContent = it.firstChild.textContent.trim();
+    sort.classList.remove('open');
+    // TODO: подключить реальную сортировку
+  }));
+
+  /* ── «Смотреть все →»: стрелка возле каждой полки ── */
+  document.querySelectorAll('.shelf__more').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault();
+    const k = a.dataset.goto;
+    const target = sort.querySelector(`.sort__it[data-k="${k}"]`);
+    if (target) target.click();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }));
+
+  /* ── Звёздочка желаемого (как в Steam) ── */
+  const pip  = document.getElementById('heartPip');
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  let wishN = 0, toastT;
+
+  document.addEventListener('click', e => {
+    const st = e.target.closest('.star');
+    if (!st) return;
+    e.stopPropagation();
+    const on = st.classList.toggle('on');
+    st.textContent = on ? '★' : '☆';
+    wishN += on ? 1 : -1;
+    pip.textContent = wishN;
+    pip.toggleAttribute('data-zero', wishN === 0);
+    toastMsg.textContent = on ? 'Добавлено в желаемое' : 'Убрано из желаемого';
+    toast.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toast.classList.remove('show'), 1700);
+  });
+
+  /* ── Фильтры: аккордеон + чипы ── */
+  const bindFam = root => {
+    root.querySelectorAll('.fam__btn').forEach(b => b.addEventListener('click', () => {
+      b.closest('.fam').classList.toggle('open');
+    }));
+    root.querySelectorAll('.chip').forEach(c => c.addEventListener('click', e => {
+      e.preventDefault();
+      c.classList.toggle('on');
+      refreshCounts();
+    }));
+  };
+  bindFam(document.getElementById('rail'));
+
+  const refreshCounts = () => {
+    document.querySelectorAll('#rail .fam').forEach(f => {
+      const n = f.querySelectorAll('.chip.on').length;
+      let dot = f.querySelector('.fam__btn .dot');
+      if (n > 0 && !dot) {
+        dot = document.createElement('span');
+        dot.className = 'dot';
+        f.querySelector('.fam__btn').prepend(dot);
+      }
+      if (dot) { dot.textContent = n; if (!n) dot.remove(); }
+    });
+  };
+
+  document.getElementById('railClear').addEventListener('click', () => {
+    document.querySelectorAll('#rail .chip.on').forEach(c => c.classList.remove('on'));
+    document.querySelectorAll('#rail .prange input').forEach(i => i.value='');
+    refreshCounts();
+  });
+
+  /* ── Мобильное меню: на весь экран справа ── */
+  const burger = document.getElementById('burger');
+  const sheet  = document.getElementById('sheet');
+  const veil   = document.getElementById('veil');
+  const rail   = document.getElementById('rail');
+
+  // Клонируем фильтры в мобильную панель
+  const clone = rail.cloneNode(true);
+  clone.removeAttribute('id');
+  clone.classList.add('rail');
+  clone.style.cssText = 'position:static;max-height:none;border:none;box-shadow:none;padding:0';
+  document.getElementById('sheetBody').appendChild(clone);
+  bindFam(clone);
+
+  const openSheet  = () => {
+    sheet.classList.add('open'); veil.classList.add('open');
+    sheet.setAttribute('aria-hidden','false');
+    burger.setAttribute('aria-expanded','true');
+    document.body.style.overflow='hidden';
+  };
+  const closeSheet = () => {
+    sheet.classList.remove('open'); veil.classList.remove('open');
+    sheet.setAttribute('aria-hidden','true');
+    burger.setAttribute('aria-expanded','false');
+    document.body.style.overflow='';
+  };
+  burger.addEventListener('click', openSheet);
+  document.getElementById('sheetX').addEventListener('click', closeSheet);
+  veil.addEventListener('click', closeSheet);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+
+  /* ── Пагинация (демо) ── */
+  document.querySelectorAll('.pg').forEach(p => p.addEventListener('click', () => {
+    if (p.classList.contains('etc')) return;
+    document.querySelectorAll('.pg').forEach(x => x.classList.remove('on'));
+    p.classList.add('on');
+  }));
+
+  /* ── Ctrl+K → фокус в поиск ── */
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      document.querySelector('.find input')?.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>
