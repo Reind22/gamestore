@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GameStore — магазин игровых аккаунтов и ключей</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22%2300FF00%22/%3E%3Cg stroke=%22%23053B05%22 stroke-width=%224.5%22 stroke-linecap=%22round%22 fill=%22none%22%3E%3Cpath d=%22M18 30h9M22.5 25.5v9%22/%3E%3Ccircle cx=%2240%22 cy=%2228%22 r=%222.4%22 fill=%22%23053B05%22 stroke=%22none%22/%3E%3Ccircle cx=%2246%22 cy=%2233%22 r=%222.4%22 fill=%22%23053B05%22 stroke=%22none%22/%3E%3Cpath d=%22M44 16H20a11 11 0 0 0-10.9 9.8c-.7 5.5-1.2 11.2-1.2 14.3C7.9 45.6 12 49 17.7 49c3.4 0 6-1.5 8-3.5l2.4-2.4a7 7 0 0 1 10.4 0l2.4 2.4c2 2 4.6 3.5 8 3.5 5.7 0 9.8-3.4 9.8-8.9 0-3.1-.5-8.8-1.2-14.3A11 11 0 0 0 44 16z%22/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
@@ -261,7 +262,7 @@ img,svg{display:block}
 .rail-clone{background:transparent;border:none;box-shadow:none;position:static;max-height:none;overflow:visible;padding:0}
 
 /* ═══════════ КАРКАС ═══════════ */
-.frame{max-width:1400px;margin:0 auto;padding:26px 26px 64px}
+.frame{max-width:1700px;margin:0 auto;padding:26px clamp(14px, 2.5vw, 40px) 64px}
 
 /* ═══════════ БАННЕР-КАРУСЕЛЬ (как в Steam) ═══════════ */
 .hero{
@@ -565,6 +566,28 @@ img,svg{display:block}
 
 
 
+
+/* Способы оплаты: бегущая строка */
+.pay-marquee{
+  overflow:hidden;position:relative;
+  margin-top:26px;padding:18px 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  mask:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.pay-track{
+  display:flex;align-items:center;gap:44px;width:max-content;
+  animation:pay-scroll 30s linear infinite;
+}
+.pay-marquee:hover .pay-track{animation-play-state:paused}
+@keyframes pay-scroll{to{transform:translateX(-50%)}}
+.pay-item{
+  display:flex;align-items:center;gap:10px;
+  font-size:15px;font-weight:800;color:var(--ink-2);
+  white-space:nowrap;
+}
+.pay-item svg{width:30px;height:20px;flex-shrink:0}
+
 /* Бегущая строка отзывов */
 .rv-marquee{
   overflow:hidden;position:relative;
@@ -627,10 +650,10 @@ body{ overflow-x:hidden }
 .brand__name small{ white-space:nowrap }
 .acts{ min-width:0 }
 .row, .sim-row{
-  grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)) !important;
+  grid-template-columns:repeat(auto-fill, minmax(172px, 1fr)) !important;
 }
 @media (max-width:620px){
-  .row, .sim-row{ grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)) !important }
+  .row, .sim-row{ grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)) !important }
 }
 </style>
 </head>
@@ -654,7 +677,8 @@ body{ overflow-x:hidden }
     <nav class="nav" aria-label="Разделы">
       <a class="on" href="index.html" data-i18n="navHome">Главная</a>
       <a href="catalog.html" data-i18n="navCatalog">Каталог</a>
-      <a href="#" data-i18n="navHelp">Помощь</a>
+      <a href="reviews.html" data-i18n="navReviews">Отзывы</a>
+      <a href="faq.html" data-i18n="navHelp">Помощь</a>
     </nav>
 
     <div class="find">
@@ -677,11 +701,11 @@ body{ overflow-x:hidden }
 
 <div class="dd" data-dd="cur"></div>
 
-      <button class="knob" id="heartBtn" aria-label="Желаемое">
+      <button class="knob" id="heartBtn" aria-label="Желаемое" onclick="location.href='wishlist.html'">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.5-1.5 2-3.1 2-4.6A4.4 4.4 0 0 0 16.6 5c-1.7 0-3 .9-4.6 2.6C10.4 5.9 9.1 5 7.4 5A4.4 4.4 0 0 0 3 9.4c0 1.5.5 3.1 2 4.6l7 7z"/></svg>
         <span class="pip" id="heartPip" data-zero></span>
       </button>
-      <button class="knob" aria-label="Корзина">
+      <button class="knob" aria-label="Корзина" onclick="location.href='cart.html'">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9.3" cy="19.8" r="1.5"/><circle cx="17" cy="19.8" r="1.5"/><path d="M3.2 4h2.4l2.2 11.1a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21.3 8H6.1"/></svg>
         <span class="pip" id="cartPip" data-zero>0</span>
       </button>
@@ -746,8 +770,10 @@ body{ overflow-x:hidden }
   </div>
   <div class="rv-marquee"><div class="rv-track" id="rvTrack"></div></div>
 
-</div>
+  <!-- Способы оплаты -->
+  <div class="pay-marquee"><div class="pay-track" id="payTrack"></div></div>
 
+</div>
 <!-- ═══════════ ФУТЕР ═══════════ -->
 <footer class="ftr">
   <div class="ftr__in">
@@ -759,10 +785,10 @@ body{ overflow-x:hidden }
       <p class="ftr__note" style="margin-top:8px">© 2026 GameStore.<br><span data-i18n="curNote">Все цены в USD. Другая валюта — для удобства просмотра.</span></p>
     </div>
     <nav class="ftr__nav">
-      <a href="#" data-i18n="ftAbout">О магазине</a>
-      <a href="#" data-i18n="ftWarranty">Гарантии</a>
-      <a href="#" data-i18n="ftPay">Оплата</a>
-      <a href="#" data-i18n="ftSupport">Поддержка</a>
+      <a href="stub.html?t=О магазине">О магазине</a>
+      <a href="guarantees.html">Гарантии</a>
+      <a href="stub.html?t=Оплата">Оплата</a>
+      <a href="faq.html">FAQ</a>
     </nav>
   </div>
 </footer>
@@ -862,7 +888,7 @@ body{ overflow-x:hidden }
              onerror="this.remove()">`
       : '';
     const badge = g.badge === 'new' ? '<span class="tag tag--new">New</span>'
-                : g.badge === 'hot' ? '<span class="tag tag--hot">Hot</span>'
+                : g.badge === 'hot' ? `<span class="tag tag--hot">${L('hitBadge')} · ${g.sold}</span>`
                 : g.oldPrice ? `<span class="tag tag--cut">−${Math.round((1 - g.price / g.oldPrice) * 100)}%</span>`
                 : '';
     return `
@@ -946,6 +972,24 @@ body{ overflow-x:hidden }
   const rvEl = $('#rvTrack');
   if (rvEl){
     rvEl.innerHTML = [...REVIEWS, ...REVIEWS].map(rvCard).join('');
+  }
+
+  /* ═══ Способы оплаты: бегущая строка ═══ */
+  const PAYS = [
+    { n:'Visa', ico:'<svg viewBox="0 0 48 24"><rect width="48" height="24" rx="4" fill="#1A1F71"/><text x="24" y="17" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle" font-family="Arial" font-style="italic">VISA</text></svg>' },
+    { n:'Mastercard', ico:'<svg viewBox="0 0 48 24"><rect width="48" height="24" rx="4" fill="#26271F" opacity="0"/><circle cx="19" cy="12" r="8" fill="#EB001B"/><circle cx="29" cy="12" r="8" fill="#F79E1B" opacity=".9"/></svg>' },
+    { n:'Bitcoin', ico:'<svg viewBox="0 0 48 24"><rect width="48" height="24" rx="4" fill="#F7931A"/><text x="24" y="17" font-size="12" font-weight="bold" fill="#fff" text-anchor="middle" font-family="Arial">₿</text></svg>' },
+    { n:'USDT', ico:'<svg viewBox="0 0 48 24"><rect width="48" height="24" rx="4" fill="#26A17B"/><text x="24" y="16.5" font-size="9.5" font-weight="bold" fill="#fff" text-anchor="middle" font-family="Arial">USDT</text></svg>' },
+    { n:'МИР', ico:'<svg viewBox="0 0 48 24"><rect width="48" height="24" rx="4" fill="#fff" stroke="#DDD"/><text x="24" y="16.5" font-size="10" font-weight="bold" fill="#0F754E" text-anchor="middle" font-family="Arial">МИР</text></svg>' },
+    { n:'СБП', ico:'<svg viewBox="0 0 48 24"><rect width="48" height="24" rx="4" fill="#fff" stroke="#DDD"/><text x="24" y="16.5" font-size="10" font-weight="bold" fill="#7700FF" text-anchor="middle" font-family="Arial">СБП</text></svg>' },
+    { n:'TON', ico:'<svg viewBox="0 0 48 24"><rect width="48" height="24" rx="4" fill="#0098EA"/><text x="24" y="16.5" font-size="10" font-weight="bold" fill="#fff" text-anchor="middle" font-family="Arial">TON</text></svg>' },
+    { n:'ETH', ico:'<svg viewBox="0 0 48 24"><rect width="48" height="24" rx="4" fill="#3C3C3D"/><text x="24" y="16.5" font-size="10" font-weight="bold" fill="#fff" text-anchor="middle" font-family="Arial">ETH</text></svg>' },
+  ];
+  const payTrack = $('#payTrack');
+  if (payTrack){
+    payTrack.innerHTML = [...PAYS, ...PAYS].map(p =>
+      `<span class="pay-item">${p.ico}<span>${p.n}</span></span>`
+    ).join('');
   }
 })();
 </script>

@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Каталог — GameStore</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22%2300FF00%22/%3E%3Cg stroke=%22%23053B05%22 stroke-width=%224.5%22 stroke-linecap=%22round%22 fill=%22none%22%3E%3Cpath d=%22M18 30h9M22.5 25.5v9%22/%3E%3Ccircle cx=%2240%22 cy=%2228%22 r=%222.4%22 fill=%22%23053B05%22 stroke=%22none%22/%3E%3Ccircle cx=%2246%22 cy=%2233%22 r=%222.4%22 fill=%22%23053B05%22 stroke=%22none%22/%3E%3Cpath d=%22M44 16H20a11 11 0 0 0-10.9 9.8c-.7 5.5-1.2 11.2-1.2 14.3C7.9 45.6 12 49 17.7 49c3.4 0 6-1.5 8-3.5l2.4-2.4a7 7 0 0 1 10.4 0l2.4 2.4c2 2 4.6 3.5 8 3.5 5.7 0 9.8-3.4 9.8-8.9 0-3.1-.5-8.8-1.2-14.3A11 11 0 0 0 44 16z%22/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
@@ -321,10 +322,10 @@ body{ overflow-x:hidden }
 .acts{ min-width:0 }
 /* Сетка: auto-fill — карточки заполняют любую ширину без боковых пустот */
 .row, .sim-row{
-  grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)) !important;
+  grid-template-columns:repeat(auto-fill, minmax(172px, 1fr)) !important;
 }
 @media (max-width:620px){
-  .row, .sim-row{ grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)) !important }
+  .row, .sim-row{ grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)) !important }
 }
 </style>
 </head>
@@ -368,11 +369,11 @@ body{ overflow-x:hidden }
       </div>
 <div class="dd" data-dd="lang"></div>
 <div class="dd" data-dd="cur"></div>
-      <button class="knob" id="heartBtn" aria-label="Желаемое">
+      <button class="knob" id="heartBtn" aria-label="Желаемое" onclick="location.href='wishlist.html'">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.5-1.5 2-3.1 2-4.6A4.4 4.4 0 0 0 16.6 5c-1.7 0-3 .9-4.6 2.6C10.4 5.9 9.1 5 7.4 5A4.4 4.4 0 0 0 3 9.4c0 1.5.5 3.1 2 4.6l7 7z"/></svg>
         <span class="pip" id="heartPip" data-zero></span>
       </button>
-      <button class="knob" aria-label="Корзина">
+      <button class="knob" aria-label="Корзина" onclick="location.href='cart.html'">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9.3" cy="19.8" r="1.5"/><circle cx="17" cy="19.8" r="1.5"/><path d="M3.2 4h2.4l2.2 11.1a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21.3 8H6.1"/></svg>
         <span class="pip" id="cartPip" data-zero>0</span>
       </button>
@@ -543,6 +544,8 @@ body{ overflow-x:hidden }
     F.sort = urlP.get('sort');
   }
   if (urlP.get('q')) $('#search').value = urlP.get('q');
+  if (urlP.get('fPlatform')) F.platform.add(urlP.get('fPlatform'));
+  if (urlP.get('fGenre')) F.genre.add(urlP.get('fGenre'));
 
   /* ── Построение фильтров из данных ── */
   function countFor(list, field, key){
@@ -558,13 +561,16 @@ body{ overflow-x:hidden }
         <span class="chip__lbl">${v[lang()]}</span><span class="chip__n">${n}</span>
       </label>`;
     }).join('');
-    box.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
-      c.classList.toggle('on');
-      const k = c.dataset.k;
-      F[field].has(k) ? F[field].delete(k) : F[field].add(k);
-      F.page = 1;
-      render();
-    }));
+    box.querySelectorAll('.chip').forEach(c => {
+      if (F[field].has(c.dataset.k)) c.classList.add('on');
+      c.addEventListener('click', () => {
+        c.classList.toggle('on');
+        const k = c.dataset.k;
+        F[field].has(k) ? F[field].delete(k) : F[field].add(k);
+        F.page = 1;
+        render();
+      });
+    });
   }
 
   chipGroup('#fPlatform', 'platform', Object.fromEntries(PLATFORMS.map(p => [p, { ru: p, en: p }])));
@@ -766,7 +772,7 @@ body{ overflow-x:hidden }
       ? `<img class="capsule" src="${steamCapsule(STEAM_ART[artKey])}" alt="" loading="lazy" onerror="this.remove()">`
       : '';
     const badge = g.badge === 'new' ? '<span class="tag tag--new">New</span>'
-                : g.badge === 'hot' ? '<span class="tag tag--hot">Hot</span>'
+                : g.badge === 'hot' ? `<span class="tag tag--hot">${L('hitBadge')} · ${g.sold}</span>`
                 : g.oldPrice ? `<span class="tag tag--cut">−${Math.round((1 - g.price / g.oldPrice) * 100)}%</span>`
                 : '';
     return `

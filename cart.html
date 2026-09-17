@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Корзина — GameStore</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2216%22 fill=%22%2300FF00%22/%3E%3Cg stroke=%22%23053B05%22 stroke-width=%224.5%22 stroke-linecap=%22round%22 fill=%22none%22%3E%3Cpath d=%22M18 30h9M22.5 25.5v9%22/%3E%3Ccircle cx=%2240%22 cy=%2228%22 r=%222.4%22 fill=%22%23053B05%22 stroke=%22none%22/%3E%3Ccircle cx=%2246%22 cy=%2233%22 r=%222.4%22 fill=%22%23053B05%22 stroke=%22none%22/%3E%3Cpath d=%22M44 16H20a11 11 0 0 0-10.9 9.8c-.7 5.5-1.2 11.2-1.2 14.3C7.9 45.6 12 49 17.7 49c3.4 0 6-1.5 8-3.5l2.4-2.4a7 7 0 0 1 10.4 0l2.4 2.4c2 2 4.6 3.5 8 3.5 5.7 0 9.8-3.4 9.8-8.9 0-3.1-.5-8.8-1.2-14.3A11 11 0 0 0 44 16z%22/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
@@ -176,6 +177,21 @@ img,svg{display:block}
   font-size:11px;font-weight:600;color:var(--ink-3);
   margin-top:10px;
 }
+.promo{display:flex;gap:8px;margin-top:14px}
+.promo input{
+  flex:1;min-width:0;height:42px;padding:0 13px;
+  border:1.5px dashed var(--line-2);border-radius:11px;
+  background:var(--bg);font:inherit;font-size:13px;font-weight:700;color:var(--ink);
+  text-transform:uppercase;
+}
+.promo input:focus{outline:none;border-color:var(--lime-deep)}
+.promo button{
+  height:42px;padding:0 16px;border-radius:11px;flex-shrink:0;
+  border:1.5px solid var(--line-2);background:var(--paper-2);
+  font-size:12.5px;font-weight:800;color:var(--ink-2);transition:.15s;
+}
+.promo button:hover{border-color:var(--lime-deep);color:var(--lime-deep)}
+.promo.ok input{border-color:var(--lime-deep);border-style:solid}
 .btn-checkout{
   width:100%;height:52px;border-radius:14px;
   background:linear-gradient(140deg,#5CFF5C,var(--lime) 45%,#00D400);
@@ -364,6 +380,11 @@ body{ overflow-x:hidden }
         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v.5M12 11v5"/></svg>
         <span data-i18n="curNote">Расчёт и оплата — в USD</span>
       </div>
+      <div class="promo">
+        <input type="text" id="promoInput" placeholder="Промокод" aria-label="Промокод">
+        <button id="promoBtn" data-i18n="apply">Применить</button>
+      </div>
+      <div class="sum-row" id="promoRow" style="display:none;color:var(--lime-deep)"><span data-i18n="discount">Скидка по промокоду</span><span class="money" id="sumPromo">−$0</span></div>
       <button class="btn-checkout" id="checkout" data-i18n="checkout">Перейти к оплате</button>
       <a class="btn-continue" href="catalog.html" data-i18n="continue">Продолжить покупки</a>
       <div class="pay-methods">
@@ -410,6 +431,7 @@ body{ overflow-x:hidden }
   const { $, $$, lang, L, fmt, money, toast, state } = GS;
 
   const FEE_RATE = 0.02; // 2% комиссия ПС (демо)
+  const PROMOS = { 'WELCOME10': 0.10, 'GAME5': 0.05, 'FIRST15': 0.15 }; // демо-база
 
   function render(){
     const list = $('#cartList');
@@ -454,12 +476,16 @@ body{ overflow-x:hidden }
     // Итоги
     const goodsSum = items.reduce((s, x) => s + x.game.price * x.qty, 0);
     const count = items.reduce((s, x) => s + x.qty, 0);
-    const fee = goodsSum * FEE_RATE;
-    const total = goodsSum + fee;
+    const promoOff = (window._promoRate || 0) * goodsSum;
+    const fee = (goodsSum - promoOff) * FEE_RATE;
+    const total = goodsSum - promoOff + fee;
     $('#sumCount').textContent = count;
     $('#sumGoods').textContent = money(goodsSum);
     $('#sumFee').textContent = money(fee);
     $('#sumTotal').textContent = money(total);
+    const pr = $('#promoRow');
+    if (window._promoRate){ pr.style.display = 'flex'; $('#sumPromo').textContent = '−' + money(promoOff); }
+    else pr.style.display = 'none';
 
     // События
     list.querySelectorAll('[data-minus]').forEach(b => b.addEventListener('click', () => {
@@ -490,6 +516,21 @@ body{ overflow-x:hidden }
       }, 280);
     }));
   }
+
+  $('#promoBtn').addEventListener('click', () => {
+    const code = $('#promoInput').value.trim().toUpperCase();
+    const box = $('#promoInput').closest('.promo');
+    if (PROMOS[code]){
+      window._promoRate = PROMOS[code];
+      box.classList.add('ok');
+      toast(lang() === 'ru' ? `Промокод применён: −${PROMOS[code]*100}%` : `Promo applied: −${PROMOS[code]*100}%`);
+    } else {
+      window._promoRate = 0;
+      box.classList.remove('ok');
+      toast(lang() === 'ru' ? 'Промокод не найден' : 'Promo code not found');
+    }
+    render();
+  });
 
   $('#checkout').addEventListener('click', () => {
     if (!state.cart.length) return;

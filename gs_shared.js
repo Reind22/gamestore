@@ -12,7 +12,7 @@ const GS = (() => {
   const DEC   = { USD: 2, RUB: 0, EUR: 2 };
 
   const state = {
-    theme: localStorage.getItem('gs-theme') || 'light',
+    theme: localStorage.getItem('gs-theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
     lang:  localStorage.getItem('gs-lang')  || 'ru',
     cur:   localStorage.getItem('gs-cur')   || 'USD',
     wish:  JSON.parse(localStorage.getItem('gs-wish') || '[]'),
@@ -75,6 +75,7 @@ const GS = (() => {
     fee:'Комиссия платёжной системы', toPay:'К оплате', checkout:'Перейти к оплате',
     continue:'Продолжить покупки', payMore:'и другие',
     cartAddMsg2:'Добавлено в корзину',
+    hitBadge:'Хит продаж',
     onlySale:'Только со скидкой', sortDiscBig:'Скидка: сначала больше', sortDiscSmall:'Скидка: сначала меньше', perPage:'Товаров на странице:', nothingFound:'Ничего не найдено',
     from:'От', to:'До',
     buyNow:'Купить сейчас', toCart:'Добавить в корзину', inCart:'В корзине',
@@ -108,6 +109,7 @@ const GS = (() => {
       showResults:'Show results', ftAbout:'About', ftWarranty:'Warranty', ftPay:'Payment', ftSupport:'Support',
       wishAdd:'Added to wishlist', wishDel:'Removed from wishlist',
       cartAddMsg:'Added to cart',
+      hitBadge:'Bestseller',
       toWish:'Add to wishlist', inWish:'In wishlist ★', similar:'Similar items',
       navWish:'Wishlist', navCart:'Cart', cartTtl:'Cart', wishTtl:'Wishlist',
       wishEmpty:'Your wishlist is empty', wishEmptySub:'Tap the star on any item to save it here',
@@ -450,7 +452,16 @@ const GS = (() => {
 
     document.body.appendChild(wrap);
     const fab = wrap.querySelector('.fab');
-    fab.addEventListener('click', () => wrap.classList.toggle('open'));
+    fab.addEventListener('click', () => {
+      // closed → stage1 (только TG) → open (окно чата) → closed
+      if (wrap.classList.contains('open')){
+        wrap.classList.remove('open'); wrap.classList.remove('stage1');
+      } else if (wrap.classList.contains('stage1')){
+        wrap.classList.remove('stage1'); wrap.classList.add('open');
+      } else {
+        wrap.classList.add('stage1');
+      }
+    });
 
     const input = wrap.querySelector('input');
     const body = wrap.querySelector('#gs-chat-body');
