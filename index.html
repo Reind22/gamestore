@@ -9,38 +9,40 @@
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════
-   GameStore — v1.0 «Signal»
-   Магазин своих товаров (не маркетплейс)
-   Палитра: серый #F0F0F0 + лого #00FF00
+   GameStore — v1.1 «Signal»
+   + тема (светлая/тёмная), язык (RU/EN), валюта (USD базовая)
+   Все цены хранятся в USD (data-usd), отображаются в выбранной валюте
    ═══════════════════════════════════════════════ */
 
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
 
+/* ── ТЕМЫ ── */
 :root{
-  /* ── Поверхности ── */
-  --bg:        #F0F0F0;   /* фон страницы — RGB 240,240,240 */
+  /* Светлая (базовая) */
+  --bg:        #F0F0F0;
   --paper:     #FFFFFF;
   --paper-2:   #FAFBFA;
-  --hover-wash:#F0F8F0;   /* светло-зелёная вода, не болотная */
+  --hover-wash:#F0F8F0;
 
-  /* ── Фирменный зелёный ── */
-  --lime:      #00FF00;   /* лого — RGB 0,255,0 */
-  --lime-deep: #0ECC0E;   /* интерактив, цены */
-  --lime-ink:  #053B05;   /* текст на зелёном */
+  --lime:      #00FF00;
+  --lime-deep: #0ECC0E;
+  --lime-ink:  #053B05;
   --lime-line: #C4ECC4;
   --lime-glow: rgba(0,220,60,.18);
 
-  /* ── Текст ── */
   --ink:   #171B17;
   --ink-2: #545B54;
   --ink-3: #969E96;
 
-  /* ── Служебные ── */
   --line:    #E4E7E4;
   --line-2:  #D8DDD8;
   --red:     #E5484D;
   --red-bg:  #FDEDEE;
   --gold:    #FFD84D;
+
+  --hdr-bg:  rgba(255,255,255,.86);
+  --pic-a:   #ECF7EC;
+  --pic-b:   #D8EFD8;
 
   --sh-1: 0 1px 2px rgba(23,27,23,.05), 0 3px 12px rgba(23,27,23,.05);
   --sh-2: 0 12px 32px rgba(23,27,23,.13);
@@ -49,11 +51,39 @@
   --r-s: 10px; --r-m: 14px; --r-l: 18px;
   --ease: cubic-bezier(.22,.75,.28,1);
 }
+html[data-theme="dark"]{
+  --bg:        #101310;
+  --paper:     #191D19;
+  --paper-2:   #1E231E;
+  --hover-wash:#1C2A1C;
+
+  --lime:      #3DFF3D;
+  --lime-deep: #2FE22F;
+  --lime-ink:  #052B05;
+  --lime-line: #2A4A2A;
+  --lime-glow: rgba(0,220,60,.22);
+
+  --ink:   #E8ECE8;
+  --ink-2: #A8B0A8;
+  --ink-3: #6B756B;
+
+  --line:    #262B26;
+  --line-2:  #313831;
+  --red:     #FF6369;
+  --red-bg:  #3A1E20;
+  --gold:    #FFD84D;
+
+  --hdr-bg:  rgba(20,24,20,.86);
+  --pic-a:   #1B271B;
+  --pic-b:   #223022;
+
+  --sh-1: 0 1px 2px rgba(0,0,0,.3), 0 3px 12px rgba(0,0,0,.25);
+  --sh-2: 0 12px 32px rgba(0,0,0,.5);
+}
 
 html { scroll-behavior:smooth }
 body{
   font-family:'Manrope', system-ui, -apple-system, sans-serif;
-  /* фон: серый с деликатным светло-зелёным дыханием */
   background:
     radial-gradient(1100px 500px at 85% -8%, rgba(0,255,0,.045), transparent 62%),
     radial-gradient(900px 460px at -10% 12%, rgba(0,255,0,.03), transparent 58%),
@@ -62,6 +92,7 @@ body{
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
+  transition:background .3s, color .3s;
 }
 a{color:inherit;text-decoration:none}
 button{font:inherit;border:none;background:none;color:inherit;cursor:pointer}
@@ -70,18 +101,19 @@ img,svg{display:block}
 :focus-visible{outline:2.5px solid var(--lime-deep);outline-offset:2px;border-radius:6px}
 ::selection{background:rgba(0,255,0,.32);color:var(--lime-ink)}
 
-/* ── Цена — моно-цифры, чтобы не прыгали ── */
+/* ── Цена — моно-цифры ── */
 .money{font-family:'JetBrains Mono',monospace;font-weight:600;letter-spacing:-.4px}
 
 /* ═══════════ HEADER ═══════════ */
 .hdr{
   position:sticky; top:0; z-index:130;
-  background:rgba(255,255,255,.86);
+  background:var(--hdr-bg);
   backdrop-filter:blur(14px) saturate(1.4);
   -webkit-backdrop-filter:blur(14px) saturate(1.4);
   border-bottom:1px solid var(--line);
+  transition:background .3s;
 }
-.hdr::after{ /* зелёная нить прогресса по низу шапки */
+.hdr::after{
   content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px;
   background:linear-gradient(90deg, transparent 0%, var(--lime) 18%, var(--lime) 82%, transparent 100%);
   opacity:.5;
@@ -122,7 +154,7 @@ img,svg{display:block}
   transition:color .16s, background .16s;
 }
 .nav a:hover{color:var(--ink);background:var(--hover-wash)}
-.nav a.on{color:var(--lime-ink)}
+.nav a.on{color:var(--lime-deep)}
 .nav a.on::after{
   content:'';position:absolute;left:15px;right:15px;bottom:4px;height:3px;
   border-radius:2px;background:linear-gradient(90deg,var(--lime),var(--lime-deep));
@@ -163,7 +195,7 @@ img,svg{display:block}
 }
 .knob svg{width:19px;height:19px}
 .knob:hover{
-  border-color:var(--lime-deep);color:var(--lime-ink);
+  border-color:var(--lime-deep);color:var(--lime-deep);
   background:var(--hover-wash);transform:translateY(-1px);
   box-shadow:0 4px 12px rgba(0,200,60,.16);
 }
@@ -171,7 +203,7 @@ img,svg{display:block}
   position:absolute;top:-5px;right:-5px;
   min-width:19px;height:19px;padding:0 5px;
   border-radius:10px;background:var(--lime-deep);color:#fff;
-  border:2.5px solid #fff;
+  border:2.5px solid var(--paper);
   font-size:10.5px;font-weight:800;display:grid;place-items:center;
 }
 .knob .pip:empty, .knob .pip[data-zero]{display:none}
@@ -187,7 +219,33 @@ img,svg{display:block}
 .btn-go:active{transform:translateY(0)}
 .btn-burger{display:none}
 
-/* ═══════════ Мобильное меню (весь экран) ═══════════ */
+/* ── Переключатели: тема / язык / валюта ── */
+.seg{
+  display:flex;align-items:center;
+  background:var(--paper);
+  border:1.5px solid var(--line-2);border-radius:13px;
+  padding:3px;gap:2px;
+  height:44px;
+  transition:.18s;
+}
+.seg__btn{
+  min-width:38px;height:36px;padding:0 8px;
+  border-radius:10px;
+  display:grid;place-items:center;
+  font-size:12.5px;font-weight:800;color:var(--ink-3);
+  transition:all .16s var(--ease);
+  letter-spacing:.02em;
+}
+.seg__btn svg{width:17px;height:17px}
+.seg__btn:hover{color:var(--ink)}
+.seg__btn.on{
+  background:var(--hover-wash);
+  color:var(--lime-deep);
+  box-shadow:inset 0 0 0 1.5px var(--lime-line);
+}
+.seg--theme .seg__btn{min-width:44px;width:44px;padding:0}
+
+/* ═══════════ Мобильное меню ═══════════ */
 .veil{
   position:fixed;inset:0;z-index:190;
   background:rgba(12,16,12,.5);
@@ -223,6 +281,12 @@ img,svg{display:block}
 .sheet__body{flex:1;overflow-y:auto;padding:16px}
 .sheet__foot{padding:14px 18px;border-top:1px solid var(--line)}
 .sheet__foot .btn-go{width:100%}
+/* Сегменты в мобильной панели */
+.sheet__prefs{display:flex;flex-direction:column;gap:12px;padding:4px 4px 14px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.sheet__prefs .seg{width:100%;height:48px}
+.sheet__prefs .seg__btn{flex:1}
+/* Клон фильтров в мобильной панели */
+.rail-clone{background:transparent;border:none;box-shadow:none;position:static;max-height:none;overflow:visible;padding:0}
 
 /* ═══════════ КАРКАС ═══════════ */
 .frame{
@@ -302,11 +366,12 @@ img,svg{display:block}
   background:#fff;display:grid;place-items:center;
   transition:all .18s var(--ease);
 }
+html[data-theme="dark"] .chip__box{background:var(--paper-2)}
 .chip__box svg{width:11px;height:11px;stroke:var(--lime-ink);stroke-width:3.6;opacity:0;transform:scale(.4);transition:.18s var(--ease)}
 .chip.on .chip__box{background:var(--lime);border-color:var(--lime-deep);box-shadow:0 2px 8px rgba(0,220,60,.35)}
 .chip.on .chip__box svg{opacity:1;transform:scale(1)}
 .chip__lbl{flex:1;font-size:13.5px;font-weight:600;color:var(--ink-2);transition:color .15s}
-.chip.on .chip__lbl{color:var(--lime-ink);font-weight:800}
+.chip.on .chip__lbl{color:var(--lime-deep);font-weight:800}
 .chip__n{
   font-size:11px;font-weight:700;color:var(--ink-3);
   background:var(--bg);border-radius:99px;padding:2.5px 8px;
@@ -323,6 +388,7 @@ img,svg{display:block}
 }
 .prange input::placeholder{color:var(--ink-3);font-weight:500}
 .prange input:focus{outline:none;border-color:var(--lime-deep);background:#fff;box-shadow:0 0 0 3px rgba(0,220,60,.1)}
+html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
 .prange span{color:var(--ink-3);font-weight:700}
 
 /* ═══════════ ТУЛБАР / СОРТИРОВКА ═══════════ */
@@ -370,11 +436,19 @@ img,svg{display:block}
   transition:.13s;
 }
 .sort__it:hover{background:var(--hover-wash);color:var(--ink)}
-.sort__it.on{background:linear-gradient(90deg, rgba(0,255,0,.17), rgba(0,255,0,.07));color:var(--lime-ink);font-weight:800}
+.sort__it.on{background:linear-gradient(90deg, rgba(0,255,0,.17), rgba(0,255,0,.07));color:var(--lime-deep);font-weight:800}
 .sort__it .tick{font-size:12px;color:var(--lime-deep);opacity:0;transition:.13s}
 .sort__it.on .tick{opacity:1}
 
-/* ═══════════ ПОЛКИ (3 линии) ═══════════ */
+/* ── Валютный дисклеймер ── */
+.cur-note{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11.5px;font-weight:600;color:var(--ink-3);
+  margin-left:12px;
+}
+.cur-note svg{width:13px;height:13px;flex-shrink:0}
+
+/* ═══════════ ПОЛКИ ═══════════ */
 .shelf{margin-bottom:46px}
 .shelf:last-of-type{margin-bottom:0}
 
@@ -424,9 +498,9 @@ img,svg{display:block}
   box-shadow:var(--sh-1);
   overflow:hidden;
   cursor:pointer;
-  transition:transform .24s var(--ease), box-shadow .24s, border-color .24s;
+  transition:transform .24s var(--ease), box-shadow .24s, border-color .24s, background .3s;
 }
-.item::before{ /* зелёная подсветка сверху при ховере */
+.item::before{
   content:'';position:absolute;top:0;left:12%;right:12%;height:2.5px;
   border-radius:0 0 4px 4px;
   background:linear-gradient(90deg, transparent, var(--lime), transparent);
@@ -440,11 +514,11 @@ img,svg{display:block}
   aspect-ratio:16/10;
   background:
     radial-gradient(120% 130% at 20% 0%, rgba(255,255,255,.65), transparent 55%),
-    linear-gradient(135deg, #ECF7EC 0%, #D8EFD8 100%);
+    linear-gradient(135deg, var(--pic-a) 0%, var(--pic-b) 100%);
   display:grid;place-items:center;
   overflow:hidden;
 }
-.item__pic::after{ /* лёгкая сетка-текстура */
+.item__pic::after{
   content:'';position:absolute;inset:0;opacity:.5;
   background-image:radial-gradient(rgba(0,140,0,.07) 1px, transparent 1.5px);
   background-size:14px 14px;
@@ -456,7 +530,7 @@ img,svg{display:block}
   font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
   padding:4px 9px;border-radius:8px;
   background:rgba(255,255,255,.94);
-  color:var(--ink-2);
+  color:#545B54;
   box-shadow:0 1px 5px rgba(0,0,0,.09);
 }
 .tag{
@@ -469,7 +543,6 @@ img,svg{display:block}
 .tag--hot{background:var(--red);color:#fff}
 .tag--cut{background:var(--red);color:#fff}
 
-/* Звезда желаемого — как в Steam */
 .star{
   position:absolute;top:9px;right:9px;z-index:3;
   width:33px;height:33px;border-radius:50%;
@@ -527,7 +600,7 @@ img,svg{display:block}
   font-size:13.5px;font-weight:800;color:var(--ink-2);
   transition:all .16s var(--ease);
 }
-.pg:hover{border-color:var(--lime-deep);color:var(--lime-ink);background:var(--hover-wash)}
+.pg:hover{border-color:var(--lime-deep);color:var(--lime-deep);background:var(--hover-wash)}
 .pg.on{
   background:linear-gradient(140deg,#5CFF5C,var(--lime) 50%,#00D400);
   border-color:var(--lime-deep);color:var(--lime-ink);
@@ -561,7 +634,7 @@ img,svg{display:block}
   position:fixed;left:50%;bottom:28px;z-index:400;
   translate:-50% 16px;
   display:flex;align-items:center;gap:10px;
-  background:var(--ink);color:#fff;
+  background:var(--ink);color:var(--bg);
   padding:13px 20px;border-radius:14px;
   font-size:13.5px;font-weight:700;
   box-shadow:var(--sh-2);
@@ -578,10 +651,12 @@ img,svg{display:block}
   .nav{display:none}
   .frame{grid-template-columns:242px minmax(0,1fr);gap:20px;padding:22px 18px 56px}
   .find kbd{display:none}
+  /* Переключатели сжимаются: остаётся компактный блок справа */
+  .seg{height:44px}
 }
 @media (max-width:840px){
   .frame{grid-template-columns:minmax(0,1fr);padding:18px 14px 52px}
-  .rail{display:none}                 /* сайдбар скрыт */
+  .rail{display:none}
   .find{display:none}
   .btn-go{display:none}
   .btn-burger{
@@ -590,11 +665,15 @@ img,svg{display:block}
     border:1.5px solid var(--line-2);background:var(--paper);
     color:var(--ink-2);transition:.16s;
   }
-  .btn-burger:hover{border-color:var(--lime-deep);color:var(--lime-ink)}
+  .btn-burger:hover{border-color:var(--lime-deep);color:var(--lime-deep)}
   .bar{margin-bottom:18px}
   .shelf{margin-bottom:36px}
   .shelf__name h2{font-size:17.5px}
   .shelf__name .emo{width:33px;height:33px;font-size:16px}
+  /* В шапке на мобиле остаётся: лого | тема | валюта | бургер */
+  .hdr__in{gap:8px}
+  .seg--lang{display:none} /* язык — только в мобильном меню */
+  .cur-note{display:none}  /* дисклеймер — в мобильном меню и футере */
 }
 @media (max-width:620px){
   .row{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
@@ -604,13 +683,14 @@ img,svg{display:block}
   .brand__name{font-size:18px}
   .brand__mark{width:35px;height:35px}
   .shelf__more{height:34px;padding:0 12px;font-size:12px}
-  /* Сортировка на мобильном: без префикса, без переносов */
   .bar{flex-wrap:wrap}
   .bar__count{width:100%}
   .sort{width:100%}
   .sort__btn{width:100%;justify-content:space-between}
   .sort__btn em{display:none}
   .sort__pop{left:0;right:auto;min-width:100%}
+  /* На самых узких экранах вся дополнительная навигация — в бургер-меню */
+  .seg--theme, .seg--lang, .hdr .seg[role="group"][aria-label="Валюта"] { display:none }
 }
 </style>
 </head>
@@ -629,22 +709,45 @@ img,svg{display:block}
           <path d="M17.3 5.5H6.7a4 4 0 0 0-3.97 3.56c-.27 2.1-.45 4.3-.45 5.5 0 2.62 1.6 3.97 3.86 3.97 1.28 0 2.23-.56 3-1.32l.9-.9a2.6 2.6 0 0 1 3.9.02l.88.9c.78.76 1.72 1.3 3 1.3 2.26 0 3.86-1.35 3.86-3.97 0-1.2-.18-3.4-.45-5.5A4 4 0 0 0 17.3 5.5z"/>
         </svg>
       </span>
-      <span class="brand__name">GameStore<small>ЭКСКЛЮЗИВНЫЕ АККАУНТЫ</small></span>
+      <span class="brand__name">GameStore<small data-i18n="brandSub">ЭКСКЛЮЗИВНЫЕ АККАУНТЫ</small></span>
     </a>
 
     <nav class="nav" aria-label="Разделы">
-      <a class="on" href="#">Каталог</a>
-      <a href="#">Акции</a>
-      <a href="#">Помощь</a>
+      <a class="on" href="#" data-i18n="navCatalog">Каталог</a>
+      <a href="#" data-i18n="navSales">Акции</a>
+      <a href="#" data-i18n="navHelp">Помощь</a>
     </nav>
 
     <div class="find">
       <svg class="find__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20.2 20.2-3.7-3.7"/></svg>
-      <input type="search" placeholder="Найти аккаунт, игру или ключ…" aria-label="Поиск">
+      <input type="search" placeholder="Найти аккаунт, игру или ключ…" aria-label="Поиск" data-i18n-ph="searchPh">
       <kbd>Ctrl K</kbd>
     </div>
 
     <div class="acts">
+      <!-- Переключатель темы -->
+      <div class="seg seg--theme" role="group" aria-label="Тема">
+        <button class="seg__btn on" data-set-theme="light" aria-label="Светлая тема">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/></svg>
+        </button>
+        <button class="seg__btn" data-set-theme="dark" aria-label="Тёмная тема">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 14.2A8.6 8.6 0 0 1 9.8 3.4a8.6 8.6 0 1 0 10.8 10.8z"/></svg>
+        </button>
+      </div>
+
+      <!-- Переключатель языка -->
+      <div class="seg seg--lang" role="group" aria-label="Язык">
+        <button class="seg__btn on" data-set-lang="ru">RU</button>
+        <button class="seg__btn" data-set-lang="en">EN</button>
+      </div>
+
+      <!-- Переключатель валюты -->
+      <div class="seg" role="group" aria-label="Валюта">
+        <button class="seg__btn on" data-set-cur="USD">$</button>
+        <button class="seg__btn" data-set-cur="RUB">₽</button>
+        <button class="seg__btn" data-set-cur="EUR">€</button>
+      </div>
+
       <button class="knob" id="heartBtn" aria-label="Желаемое">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.5-1.5 2-3.1 2-4.6A4.4 4.4 0 0 0 16.6 5c-1.7 0-3 .9-4.6 2.6C10.4 5.9 9.1 5 7.4 5A4.4 4.4 0 0 0 3 9.4c0 1.5.5 3.1 2 4.6l7 7z"/></svg>
         <span class="pip" id="heartPip">0</span>
@@ -653,7 +756,7 @@ img,svg{display:block}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9.3" cy="19.8" r="1.5"/><circle cx="17" cy="19.8" r="1.5"/><path d="M3.2 4h2.4l2.2 11.1a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21.3 8H6.1"/></svg>
         <span class="pip">2</span>
       </button>
-      <button class="btn-go">Войти</button>
+      <button class="btn-go" data-i18n="login">Войти</button>
       <button class="btn-burger" id="burger" aria-label="Фильтры" aria-expanded="false">
         <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg>
       </button>
@@ -661,17 +764,38 @@ img,svg{display:block}
   </div>
 </header>
 
-<!-- ═══════════ МОБИЛЬНАЯ ПАНЕЛЬ (весь экран) ═══════════ -->
+<!-- ═══════════ МОБИЛЬНАЯ ПАНЕЛЬ ═══════════ -->
 <div class="veil" id="veil"></div>
 <aside class="sheet" id="sheet" aria-hidden="true">
   <div class="sheet__top">
-    <span class="sheet__ttl">Фильтры</span>
+    <span class="sheet__ttl" data-i18n="filters">Фильтры</span>
     <button class="sheet__x" id="sheetX" aria-label="Закрыть">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5.5 5.5l13 13M18.5 5.5l-13 13"/></svg>
     </button>
   </div>
-  <div class="sheet__body" id="sheetBody"></div>
-  <div class="sheet__foot"><button class="btn-go">Показать результаты</button></div>
+  <div class="sheet__body" id="sheetBody">
+    <!-- Переключатели в мобильном меню -->
+    <div class="sheet__prefs">
+      <div class="seg" role="group" aria-label="Язык">
+        <button class="seg__btn on" data-set-lang="ru">RU — Русский</button>
+        <button class="seg__btn" data-set-lang="en">EN — English</button>
+      </div>
+      <div class="seg" role="group" aria-label="Тема">
+        <button class="seg__btn on" data-set-theme="light" data-i18n="themeLight">☀️ Светлая</button>
+        <button class="seg__btn" data-set-theme="dark" data-i18n="themeDark">🌙 Тёмная</button>
+      </div>
+      <div class="seg" role="group" aria-label="Валюта">
+        <button class="seg__btn on" data-set-cur="USD">USD $</button>
+        <button class="seg__btn" data-set-cur="RUB">RUB ₽</button>
+        <button class="seg__btn" data-set-cur="EUR">EUR €</button>
+      </div>
+      <span class="cur-note" style="margin:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v.5M12 11v5"/></svg>
+        <span data-i18n="curNote">Все цены в USD. Другая валюта — для удобства просмотра.</span>
+      </span>
+    </div>
+  </div>
+  <div class="sheet__foot"><button class="btn-go" data-i18n="showResults">Показать результаты</button></div>
 </aside>
 
 <!-- ═══════════ КАРКАС ═══════════ -->
@@ -679,10 +803,10 @@ img,svg{display:block}
 
   <!-- ── САЙДБАР ФИЛЬТРОВ ── -->
   <aside class="rail" id="rail" aria-label="Фильтры">
-    <div class="rail__ttl">Фильтры <button class="rail__clear" id="railClear">Сбросить</button></div>
+    <div class="rail__ttl"><span data-i18n="filters">Фильтры</span> <button class="rail__clear" id="railClear" data-i18n="reset">Сбросить</button></div>
 
     <section class="fam open">
-      <button class="fam__btn">Платформа <span class="chev">▼</span></button>
+      <button class="fam__btn"><span data-i18n="fPlatform">Платформа</span> <span class="chev">▼</span></button>
       <div class="fam__pan"><div><div class="fam__list">
         <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Steam</span><span class="chip__n">124</span></label>
         <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Epic Games</span><span class="chip__n">86</span></label>
@@ -693,19 +817,19 @@ img,svg{display:block}
     </section>
 
     <section class="fam">
-      <button class="fam__btn">Жанр <span class="chev">▼</span></button>
+      <button class="fam__btn"><span data-i18n="fGenre">Жанр</span> <span class="chev">▼</span></button>
       <div class="fam__pan"><div><div class="fam__list">
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Шутеры</span><span class="chip__n">89</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="gShooter">Шутеры</span><span class="chip__n">89</span></label>
         <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">MOBA</span><span class="chip__n">45</span></label>
         <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">RPG</span><span class="chip__n">67</span></label>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Симуляторы</span><span class="chip__n">34</span></label>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Стратегии</span><span class="chip__n">28</span></label>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Гонки</span><span class="chip__n">22</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="gSim">Симуляторы</span><span class="chip__n">34</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="gStrategy">Стратегии</span><span class="chip__n">28</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="gRacing">Гонки</span><span class="chip__n">22</span></label>
       </div></div></div>
     </section>
 
     <section class="fam">
-      <button class="fam__btn">Игра <span class="chev">▼</span></button>
+      <button class="fam__btn"><span data-i18n="fGame">Игра</span> <span class="chev">▼</span></button>
       <div class="fam__pan"><div><div class="fam__list">
         <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Counter-Strike 2</span><span class="chip__n">56</span></label>
         <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Dota 2</span><span class="chip__n">43</span></label>
@@ -718,37 +842,37 @@ img,svg{display:block}
     </section>
 
     <section class="fam open">
-      <button class="fam__btn">Цена <span class="chev">▼</span></button>
+      <button class="fam__btn"><span data-i18n="fPrice">Цена</span> <span class="chev">▼</span></button>
       <div class="fam__pan"><div><div class="fam__list">
         <div class="prange">
-          <input type="number" inputmode="numeric" placeholder="От" aria-label="Цена от">
+          <input type="number" inputmode="numeric" placeholder="От" aria-label="Цена от" data-i18n-ph="from">
           <span>—</span>
-          <input type="number" inputmode="numeric" placeholder="До" aria-label="Цена до">
+          <input type="number" inputmode="numeric" placeholder="До" aria-label="Цена до" data-i18n-ph="to">
         </div>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">До 500 ₽</span><span class="chip__n">45</span></label>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">500 – 1 000 ₽</span><span class="chip__n">67</span></label>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">1 000 – 2 000 ₽</span><span class="chip__n">43</span></label>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Более 2 000 ₽</span><span class="chip__n">23</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-cur-range>До 6 $</span><span class="chip__n">45</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-cur-range>6 – 12 $</span><span class="chip__n">67</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-cur-range>12 – 24 $</span><span class="chip__n">43</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-cur-range>Более 24 $</span><span class="chip__n">23</span></label>
       </div></div></div>
     </section>
 
     <section class="fam">
-      <button class="fam__btn">Тип аккаунта <span class="chev">▼</span></button>
+      <button class="fam__btn"><span data-i18n="fType">Тип аккаунта</span> <span class="chev">▼</span></button>
       <div class="fam__pan"><div><div class="fam__list">
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">С играми</span><span class="chip__n">156</span></label>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Пустой</span><span class="chip__n">43</span></label>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Со скинами</span><span class="chip__n">87</span></label>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">С рангом</span><span class="chip__n">65</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="tGames">С играми</span><span class="chip__n">156</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="tEmpty">Пустой</span><span class="chip__n">43</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="tSkins">Со скинами</span><span class="chip__n">87</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="tRank">С рангом</span><span class="chip__n">65</span></label>
       </div></div></div>
     </section>
 
     <section class="fam">
-      <button class="fam__btn">Регион <span class="chev">▼</span></button>
+      <button class="fam__btn"><span data-i18n="fRegion">Регион</span> <span class="chev">▼</span></button>
       <div class="fam__pan"><div><div class="fam__list">
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Россия</span><span class="chip__n">234</span></label>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">СНГ</span><span class="chip__n">123</span></label>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Европа</span><span class="chip__n">87</span></label>
-        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl">Другое</span><span class="chip__n">32</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="rRu">Россия</span><span class="chip__n">234</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="rCis">СНГ</span><span class="chip__n">123</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="rEu">Европа</span><span class="chip__n">87</span></label>
+        <label class="chip"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="rOther">Другое</span><span class="chip__n">32</span></label>
       </div></div></div>
     </section>
   </aside>
@@ -756,22 +880,24 @@ img,svg{display:block}
   <!-- ── КОНТЕНТ ── -->
   <main class="deck">
 
-    <!-- Тулбар: счётчик + сортировка справа в углу -->
     <div class="bar">
-      <span class="bar__count">Найдено <b>302</b> товара</span>
+      <span class="bar__count"><span data-i18n="found">Найдено</span> <b>302</b> <span data-i18n="items">товара</span><span class="cur-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v.5M12 11v5"/></svg>
+        <span data-i18n="curNote">Все цены в USD. Другая валюта — для удобства просмотра.</span>
+      </span></span>
       <div class="sort" id="sort">
         <button class="sort__btn" aria-haspopup="listbox" aria-expanded="false">
-          <em>Сортировка:</em>
-          <span id="sortNow">По популярности</span>
+          <em data-i18n="sortLabel">Сортировка:</em>
+          <span id="sortNow" data-i18n="sortPopular">По популярности</span>
           <span class="car">▼</span>
         </button>
         <div class="sort__pop" role="listbox">
-          <button class="sort__it on" data-k="popular">По популярности <span class="tick">✓</span></button>
-          <button class="sort__it" data-k="cheap">Сначала дешёвые <span class="tick">✓</span></button>
-          <button class="sort__it" data-k="expensive">Сначала дорогие <span class="tick">✓</span></button>
-          <button class="sort__it" data-k="rating">По рейтингу <span class="tick">✓</span></button>
-          <button class="sort__it" data-k="new">По новизне <span class="tick">✓</span></button>
-          <button class="sort__it" data-k="updated">Недавно обновлённые <span class="tick">✓</span></button>
+          <button class="sort__it on" data-k="popular"><span data-i18n="sortPopular">По популярности</span> <span class="tick">✓</span></button>
+          <button class="sort__it" data-k="cheap"><span data-i18n="sortCheap">Сначала дешёвые</span> <span class="tick">✓</span></button>
+          <button class="sort__it" data-k="expensive"><span data-i18n="sortExp">Сначала дорогие</span> <span class="tick">✓</span></button>
+          <button class="sort__it" data-k="rating"><span data-i18n="sortRating">По рейтингу</span> <span class="tick">✓</span></button>
+          <button class="sort__it" data-k="new"><span data-i18n="sortNew">По новизне</span> <span class="tick">✓</span></button>
+          <button class="sort__it" data-k="updated"><span data-i18n="sortUpdated">Недавно обновлённые</span> <span class="tick">✓</span></button>
         </div>
       </div>
     </div>
@@ -781,9 +907,9 @@ img,svg{display:block}
       <div class="shelf__head">
         <div class="shelf__name">
           <span class="emo">🆕</span>
-          <div><h2>Новинки</h2><p>Только что добавили в магазин</p></div>
+          <div><h2 data-i18n="shNew">Новинки</h2><p data-i18n="shNewSub">Только что добавили в магазин</p></div>
         </div>
-        <a class="shelf__more" href="#" data-goto="new">Смотреть все <span class="arr">→</span></a>
+        <a class="shelf__more" href="#" data-goto="new"><span data-i18n="seeAll">Смотреть все</span> <span class="arr">→</span></a>
       </div>
       <div class="row">
         <article class="item">
@@ -792,7 +918,7 @@ img,svg{display:block}
             <h3 class="item__name">Аккаунт Steam + 50 игр (CS2, GTA, Rust)</h3>
             <div class="item__sub"><span class="dots">●</span>24 игры · 340 ч наиграно</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">2 499 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="29.99">$29.99</span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -803,7 +929,7 @@ img,svg{display:block}
             <h3 class="item__name">CS2 Prime + набор редких скинов</h3>
             <div class="item__sub"><span class="dots">●</span>Prime · 12 скинов</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">1 299 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="15.49">$15.49</span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -814,7 +940,7 @@ img,svg{display:block}
             <h3 class="item__name">Epic Games + Fortnite со скинами</h3>
             <div class="item__sub"><span class="dots">●</span>Батл-пасс активен</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">899 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="10.99">$10.99</span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -825,7 +951,7 @@ img,svg{display:block}
             <h3 class="item__name">Dota 2 — аккаунт Immortal</h3>
             <div class="item__sub"><span class="dots">●</span>Ранг Immortal · 6 200 MMR</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">3 499 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="41.99">$41.99</span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -836,7 +962,7 @@ img,svg{display:block}
             <h3 class="item__name">Valorant — все агенты открыты</h3>
             <div class="item__sub"><span class="dots">●</span>23 агента · 5 скинов</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">1 799 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="21.49">$21.49</span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -849,9 +975,9 @@ img,svg{display:block}
       <div class="shelf__head">
         <div class="shelf__name">
           <span class="emo">🔥</span>
-          <div><h2>Популярное</h2><p>Покупают чаще всего</p></div>
+          <div><h2 data-i18n="shHot">Популярное</h2><p data-i18n="shHotSub">Покупают чаще всего</p></div>
         </div>
-        <a class="shelf__more" href="#" data-goto="popular">Смотреть все <span class="arr">→</span></a>
+        <a class="shelf__more" href="#" data-goto="popular"><span data-i18n="seeAll">Смотреть все</span> <span class="arr">→</span></a>
       </div>
       <div class="row">
         <article class="item">
@@ -860,7 +986,7 @@ img,svg{display:block}
             <h3 class="item__name">GTA V Premium + деньги в Online</h3>
             <div class="item__sub"><span class="dots">●</span>$10M GTA$ включено</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">1 599 ₽</span><span class="price__was"><b>−36%</b> 2 499 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="18.99">$18.99</span><span class="price__was"><b>−36%</b> <span data-usd="29.99">$29.99</span></span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -871,7 +997,7 @@ img,svg{display:block}
             <h3 class="item__name">Rust + все DLC</h3>
             <div class="item__sub"><span class="dots">●</span>4200+ часов · 15 скинов</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">2 199 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="25.99">$25.99</span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -882,7 +1008,7 @@ img,svg{display:block}
             <h3 class="item__name">Apex Legends + скины легенд</h3>
             <div class="item__sub"><span class="dots">●</span>Ранг Diamond · 19 легенд</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">999 ₽</span><span class="price__was"><b>−33%</b> 1 499 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="11.99">$11.99</span><span class="price__was"><b>−33%</b> <span data-usd="17.99">$17.99</span></span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -893,7 +1019,7 @@ img,svg{display:block}
             <h3 class="item__name">Minecraft Java + Bedrock</h3>
             <div class="item__sub"><span class="dots">●</span>Полный доступ · смена ника</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">1 199 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="14.49">$14.49</span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -904,7 +1030,7 @@ img,svg{display:block}
             <h3 class="item__name">FC 24 + Ultimate Team</h3>
             <div class="item__sub"><span class="dots">●</span>850K монет на балансе</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">2 899 ₽</span><span class="price__was"><b>−28%</b> 3 999 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="34.99">$34.99</span><span class="price__was"><b>−28%</b> <span data-usd="47.99">$47.99</span></span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -917,9 +1043,9 @@ img,svg{display:block}
       <div class="shelf__head">
         <div class="shelf__name">
           <span class="emo">🔄</span>
-          <div><h2>Недавно обновлено</h2><p>Обновили описание или цены</p></div>
+          <div><h2 data-i18n="shUpdated">Недавно обновлено</h2><p data-i18n="shUpdatedSub">Обновили описание или цены</p></div>
         </div>
-        <a class="shelf__more" href="#" data-goto="updated">Смотреть все <span class="arr">→</span></a>
+        <a class="shelf__more" href="#" data-goto="updated"><span data-i18n="seeAll">Смотреть все</span> <span class="arr">→</span></a>
       </div>
       <div class="row">
         <article class="item">
@@ -928,7 +1054,7 @@ img,svg{display:block}
             <h3 class="item__name">The Witcher 3 Complete Edition</h3>
             <div class="item__sub"><span class="dots">●</span>Все DLC · 118 ч наиграно</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">799 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="9.49">$9.49</span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -939,7 +1065,7 @@ img,svg{display:block}
             <h3 class="item__name">Cyberpunk 2077 + Phantom Liberty</h3>
             <div class="item__sub"><span class="dots">●</span>DLC активировано</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">1 499 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="17.99">$17.99</span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -950,7 +1076,7 @@ img,svg{display:block}
             <h3 class="item__name">Baldur's Gate 3</h3>
             <div class="item__sub"><span class="dots">●</span>Цифровое издание Deluxe</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">2 999 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="35.99">$35.99</span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -961,7 +1087,7 @@ img,svg{display:block}
             <h3 class="item__name">Starfield Premium Edition</h3>
             <div class="item__sub"><span class="dots">●</span>Game Pass не привязан</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">3 499 ₽</span><span class="price__was"><b>−27%</b> 4 799 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="41.99">$41.99</span><span class="price__was"><b>−27%</b> <span data-usd="56.99">$56.99</span></span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -972,7 +1098,7 @@ img,svg{display:block}
             <h3 class="item__name">Skull and Bones</h3>
             <div class="item__sub"><span class="dots">●</span>Почта сменяемая</div>
             <div class="item__buy">
-              <div class="price"><span class="price__now money">2 199 ₽</span></div>
+              <div class="price"><span class="price__now money" data-usd="25.99">$25.99</span></div>
               <button class="tocart" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
             </div>
           </div>
@@ -1002,13 +1128,13 @@ img,svg{display:block}
         <span class="brand__mark"><svg viewBox="0 0 24 24" fill="none" stroke="#053B05" stroke-width="2.1" stroke-linecap="round"><path d="M6 11.5h4M8 9.5v4"/><path d="M17.3 5.5H6.7a4 4 0 0 0-3.97 3.56c-.27 2.1-.45 4.3-.45 5.5 0 2.62 1.6 3.97 3.86 3.97 1.28 0 2.23-.56 3-1.32l.9-.9a2.6 2.6 0 0 1 3.9.02l.88.9c.78.76 1.72 1.3 3 1.3 2.26 0 3.86-1.35 3.86-3.97 0-1.2-.18-3.4-.45-5.5A4 4 0 0 0 17.3 5.5z"/></svg></span>
         <b>GameStore</b>
       </div>
-      <p class="ftr__note" style="margin-top:8px">© 2026 GameStore — магазин игровых аккаунтов и ключей.<br>Все торговые марки принадлежат их владельцам.</p>
+      <p class="ftr__note" style="margin-top:8px">© 2026 GameStore.<br><span data-i18n="curNote">Все цены в USD. Другая валюта — для удобства просмотра.</span></p>
     </div>
     <nav class="ftr__nav">
-      <a href="#">О магазине</a>
-      <a href="#">Гарантии</a>
-      <a href="#">Оплата</a>
-      <a href="#">Поддержка</a>
+      <a href="#" data-i18n="ftAbout">О магазине</a>
+      <a href="#" data-i18n="ftWarranty">Гарантии</a>
+      <a href="#" data-i18n="ftPay">Оплата</a>
+      <a href="#" data-i18n="ftSupport">Поддержка</a>
     </nav>
   </div>
 </footer>
@@ -1018,11 +1144,115 @@ img,svg{display:block}
 
 <script>
 (() => {
-  /* ── Сортировка: dropdown справа в углу ── */
-  const sort = document.getElementById('sort');
-  const btn  = sort.querySelector('.sort__btn');
-  const now  = document.getElementById('sortNow');
+  'use strict';
 
+  /* ═══════════ НАСТРОЙКИ: тема / язык / валюта ═══════════ */
+  const RATES = { USD:1, RUB:92.5, EUR:0.92 };        // к 1 USD (демо; в бою — с API)
+  const SYM   = { USD:'$', RUB:'₽', EUR:'€' };
+  const DEC   = { USD:2, RUB:0,  EUR:2 };
+
+  const state = {
+    theme: localStorage.getItem('gs-theme') || 'light',
+    lang:  localStorage.getItem('gs-lang')  || 'ru',
+    cur:   localStorage.getItem('gs-cur')   || 'USD',
+  };
+
+  const $  = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+
+  /* ── Тема ── */
+  function applyTheme(){
+    document.documentElement.dataset.theme = state.theme;
+    $$('[data-set-theme]').forEach(b => b.classList.toggle('on', b.dataset.setTheme === state.theme));
+  }
+  $$('[data-set-theme]').forEach(b => b.addEventListener('click', () => {
+    state.theme = b.dataset.setTheme;
+    localStorage.setItem('gs-theme', state.theme);
+    applyTheme();
+  }));
+
+  /* ── Валюта: конвертация всех [data-usd] ── */
+  function fmt(usd){
+    const v = usd * RATES[state.cur];
+    const d = DEC[state.cur];
+    const n = v.toLocaleString(state.lang === 'ru' ? 'ru-RU' : 'en-US', {
+      minimumFractionDigits: d, maximumFractionDigits: d
+    });
+    return state.cur === 'RUB' ? `${n} ${SYM.RUB}` : `${SYM[state.cur]}${n}`;
+  }
+  function applyCur(){
+    $$('[data-usd]').forEach(el => { el.textContent = fmt(parseFloat(el.dataset.usd)); });
+    $$('[data-set-cur]').forEach(b => b.classList.toggle('on', b.dataset.setCur === state.cur));
+  }
+  $$('[data-set-cur]').forEach(b => b.addEventListener('click', () => {
+    state.cur = b.dataset.setCur;
+    localStorage.setItem('gs-cur', state.cur);
+    applyCur();
+    toast(state.lang === 'ru'
+      ? `Цены показаны в ${state.cur}. Расчёт и оплата — в USD.`
+      : `Prices shown in ${state.cur}. Billing is in USD.`);
+  }));
+
+  /* ── Язык (RU/EN) ── */
+  const I18N = {
+    en: {
+      brandSub:'EXCLUSIVE ACCOUNTS', navCatalog:'Catalog', navSales:'Deals', navHelp:'Help',
+      searchPh:'Search accounts, games, keys…', login:'Sign in', filters:'Filters', reset:'Reset',
+      fPlatform:'Platform', fGenre:'Genre', fGame:'Game', fPrice:'Price', fType:'Account type', fRegion:'Region',
+      gShooter:'Shooters', gSim:'Simulators', gStrategy:'Strategy', gRacing:'Racing',
+      tGames:'With games', tEmpty:'Empty', tSkins:'With skins', tRank:'With rank',
+      rRu:'Russia', rCis:'CIS', rEu:'Europe', rOther:'Other',
+      found:'Found', items:'items', sortLabel:'Sort:', sortPopular:'Most popular', sortCheap:'Price: low to high',
+      sortExp:'Price: high to low', sortRating:'Top rated', sortNew:'Newest', sortUpdated:'Recently updated',
+      seeAll:'View all', shNew:'New arrivals', shNewSub:'Just added to the store',
+      shHot:'Popular', shHotSub:'Most frequently purchased',
+      shUpdated:'Recently updated', shUpdatedSub:'Description or prices updated',
+      themeLight:'☀️ Light', themeDark:'🌙 Dark',
+      curNote:'All prices are in USD. Other currencies are for convenience only.',
+      showResults:'Show results', ftAbout:'About', ftWarranty:'Warranty', ftPay:'Payment', ftSupport:'Support',
+      wishAdd:'Added to wishlist', wishDel:'Removed from wishlist',
+      from:'From', to:'To',
+    },
+    ru: {}
+  };
+  const RU_CACHE = {};
+  function applyLang(){
+    $$('[data-i18n]').forEach(el => {
+      const k = el.dataset.i18n;
+      if (state.lang === 'ru') { if (RU_CACHE[k]) el.textContent = RU_CACHE[k]; return; }
+      if (!RU_CACHE[k]) RU_CACHE[k] = el.textContent;
+      if (I18N.en[k]) el.textContent = I18N.en[k];
+    });
+    $$('[data-i18n-ph]').forEach(el => {
+      const k = el.dataset.i18nPh;
+      if (state.lang === 'ru') { if (RU_CACHE['ph_'+k]) el.placeholder = RU_CACHE['ph_'+k]; return; }
+      if (!RU_CACHE['ph_'+k]) RU_CACHE['ph_'+k] = el.placeholder;
+      if (I18N.en[k]) el.placeholder = I18N.en[k];
+    });
+    document.documentElement.lang = state.lang;
+    $$('[data-set-lang]').forEach(b => b.classList.toggle('on', b.dataset.setLang === state.lang));
+    applyCur(); // пересобрать цены в локали выбранного языка
+  }
+  $$('[data-set-lang]').forEach(b => b.addEventListener('click', () => {
+    state.lang = b.dataset.setLang;
+    localStorage.setItem('gs-lang', state.lang);
+    applyLang();
+  }));
+
+  /* ── Toast ── */
+  const toastEl = $('#toast'), toastMsg = $('#toastMsg');
+  let toastT;
+  function toast(msg){
+    toastMsg.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => toastEl.classList.remove('show'), 1900);
+  }
+
+  /* ── Сортировка ── */
+  const sort = $('#sort');
+  const btn  = sort.querySelector('.sort__btn');
+  const now  = $('#sortNow');
   btn.addEventListener('click', e => {
     e.stopPropagation();
     const open = sort.classList.toggle('open');
@@ -1034,13 +1264,12 @@ img,svg{display:block}
   sort.querySelectorAll('.sort__it').forEach(it => it.addEventListener('click', () => {
     sort.querySelectorAll('.sort__it').forEach(o => o.classList.remove('on'));
     it.classList.add('on');
-    now.textContent = it.firstChild.textContent.trim();
+    now.textContent = it.querySelector('span:not(.tick)').textContent;
     sort.classList.remove('open');
-    // TODO: подключить реальную сортировку
   }));
 
-  /* ── «Смотреть все →»: стрелка возле каждой полки ── */
-  document.querySelectorAll('.shelf__more').forEach(a => a.addEventListener('click', e => {
+  /* ── «Смотреть все →» ── */
+  $$('.shelf__more').forEach(a => a.addEventListener('click', e => {
     e.preventDefault();
     const k = a.dataset.goto;
     const target = sort.querySelector(`.sort__it[data-k="${k}"]`);
@@ -1048,12 +1277,9 @@ img,svg{display:block}
     window.scrollTo({ top:0, behavior:'smooth' });
   }));
 
-  /* ── Звёздочка желаемого (как в Steam) ── */
-  const pip  = document.getElementById('heartPip');
-  const toast = document.getElementById('toast');
-  const toastMsg = document.getElementById('toastMsg');
-  let wishN = 0, toastT;
-
+  /* ── Звёздочка желаемого ── */
+  const pip = $('#heartPip');
+  let wishN = 0;
   document.addEventListener('click', e => {
     const st = e.target.closest('.star');
     if (!st) return;
@@ -1063,13 +1289,12 @@ img,svg{display:block}
     wishN += on ? 1 : -1;
     pip.textContent = wishN;
     pip.toggleAttribute('data-zero', wishN === 0);
-    toastMsg.textContent = on ? 'Добавлено в желаемое' : 'Убрано из желаемого';
-    toast.classList.add('show');
-    clearTimeout(toastT);
-    toastT = setTimeout(() => toast.classList.remove('show'), 1700);
+    toastMsg.dataset.key = on ? 'wishAdd' : 'wishDel';
+    toast(state.lang === 'ru' ? (on ? 'Добавлено в желаемое' : 'Убрано из желаемого')
+                              : (on ? 'Added to wishlist' : 'Removed from wishlist'));
   });
 
-  /* ── Фильтры: аккордеон + чипы ── */
+  /* ── Фильтры ── */
   const bindFam = root => {
     root.querySelectorAll('.fam__btn').forEach(b => b.addEventListener('click', () => {
       b.closest('.fam').classList.toggle('open');
@@ -1083,7 +1308,7 @@ img,svg{display:block}
   bindFam(document.getElementById('rail'));
 
   const refreshCounts = () => {
-    document.querySelectorAll('#rail .fam').forEach(f => {
+    $$('#rail .fam').forEach(f => {
       const n = f.querySelectorAll('.chip.on').length;
       let dot = f.querySelector('.fam__btn .dot');
       if (n > 0 && !dot) {
@@ -1095,27 +1320,29 @@ img,svg{display:block}
     });
   };
 
-  document.getElementById('railClear').addEventListener('click', () => {
-    document.querySelectorAll('#rail .chip.on').forEach(c => c.classList.remove('on'));
-    document.querySelectorAll('#rail .prange input').forEach(i => i.value='');
+  $('#railClear').addEventListener('click', () => {
+    $$('#rail .chip.on').forEach(c => c.classList.remove('on'));
+    $$('#rail .prange input').forEach(i => i.value='');
     refreshCounts();
   });
 
-  /* ── Мобильное меню: на весь экран справа ── */
-  const burger = document.getElementById('burger');
-  const sheet  = document.getElementById('sheet');
-  const veil   = document.getElementById('veil');
-  const rail   = document.getElementById('rail');
+  /* ── Мобильное меню ── */
+  const burger = $('#burger');
+  const sheet  = $('#sheet');
+  const veil   = $('#veil');
+  const rail   = $('#rail');
 
-  // Клонируем фильтры в мобильную панель
   const clone = rail.cloneNode(true);
   clone.removeAttribute('id');
-  clone.classList.add('rail');
+  clone.classList.remove('rail');           // ← фикс: убрать класс rail (иначе display:none на мобиле)
+  clone.classList.add('rail-clone');
+  const prefs = $('.sheet__prefs');
+  clone.insertBefore(prefs, clone.firstChild);
   clone.style.cssText = 'position:static;max-height:none;border:none;box-shadow:none;padding:0';
-  document.getElementById('sheetBody').appendChild(clone);
+  $('#sheetBody').appendChild(clone);
   bindFam(clone);
 
-  const openSheet  = () => {
+  const openSheet = () => {
     sheet.classList.add('open'); veil.classList.add('open');
     sheet.setAttribute('aria-hidden','false');
     burger.setAttribute('aria-expanded','true');
@@ -1128,24 +1355,28 @@ img,svg{display:block}
     document.body.style.overflow='';
   };
   burger.addEventListener('click', openSheet);
-  document.getElementById('sheetX').addEventListener('click', closeSheet);
+  $('#sheetX').addEventListener('click', closeSheet);
   veil.addEventListener('click', closeSheet);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
 
   /* ── Пагинация (демо) ── */
-  document.querySelectorAll('.pg').forEach(p => p.addEventListener('click', () => {
+  $$('.pg').forEach(p => p.addEventListener('click', () => {
     if (p.classList.contains('etc')) return;
-    document.querySelectorAll('.pg').forEach(x => x.classList.remove('on'));
+    $$('.pg').forEach(x => x.classList.remove('on'));
     p.classList.add('on');
   }));
 
-  /* ── Ctrl+K → фокус в поиск ── */
+  /* ── Ctrl+K → поиск ── */
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
-      document.querySelector('.find input')?.focus();
+      $('.find input')?.focus();
     }
   });
+
+  /* ── Инициализация ── */
+  applyTheme();
+  applyLang();  // вызовет и applyCur
 })();
 </script>
 </body>
