@@ -245,6 +245,24 @@ img,svg{display:block}
   .cart-pic{width:76px}
   .cart-right{grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center}
 }
+
+/* ── Масштабо-устойчивость (v2.2) ── */
+body{ overflow-x:hidden }
+.hdr__in{ padding-inline:clamp(14px, 3vw, 26px); flex-wrap:nowrap; min-width:0 }
+.frame{ padding-inline:clamp(14px, 3vw, 26px) }
+.find{ min-width:120px; flex:1 1 160px }
+.find input{ padding-right:18px }
+.btn-go{ white-space:nowrap; flex-shrink:0 }
+.brand{ min-width:0 }
+.brand__name small{ white-space:nowrap }
+.acts{ min-width:0 }
+/* Сетка: auto-fill — карточки заполняют любую ширину без боковых пустот */
+.row, .sim-row{
+  grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)) !important;
+}
+@media (max-width:620px){
+  .row, .sim-row{ grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)) !important }
+}
 </style>
 </head>
 <body>
@@ -266,6 +284,7 @@ img,svg{display:block}
     <nav class="nav" aria-label="Разделы">
       <a href="index.html" data-i18n="navHome">Главная</a>
       <a href="catalog.html" data-i18n="navCatalog">Каталог</a>
+      <a href="reviews.html" data-i18n="navReviews">Отзывы</a>
       <a href="wishlist.html" data-i18n="navWish">Избранное</a>
       <a class="on" href="cart.html" data-i18n="navCart">Корзина</a>
     </nav>
@@ -373,10 +392,10 @@ img,svg{display:block}
       <p class="ftr__note" style="margin-top:8px">© 2026 GameStore.<br><span data-i18n="curNote">Все цены в USD.</span></p>
     </div>
     <nav class="ftr__nav">
-      <a href="#" data-i18n="ftAbout">О магазине</a>
-      <a href="#" data-i18n="ftWarranty">Гарантии</a>
-      <a href="#" data-i18n="ftPay">Оплата</a>
-      <a href="#" data-i18n="ftSupport">Поддержка</a>
+      <a href="stub.html?t=О магазине">О магазине</a>
+      <a href="guarantees.html">Гарантии</a>
+      <a href="stub.html?t=Оплата">Оплата</a>
+      <a href="faq.html">FAQ</a>
     </nav>
   </div>
 </footer>

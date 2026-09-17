@@ -211,6 +211,40 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
 .empty h3{font-size:19px;font-weight:800;color:var(--ink-2);margin-bottom:8px}
 .empty p{font-size:14px;font-weight:600}
 
+/* Живой поиск: подсказки */
+.sugg{
+  position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:120;
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  box-shadow:var(--sh-2);overflow:hidden;
+}
+.sugg__it{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 14px;cursor:pointer;
+  transition:background .12s;
+}
+.sugg__it:hover,.sugg__it.hl{background:var(--hover-wash)}
+.sugg__ico{font-size:22px;flex-shrink:0}
+.sugg__txt{flex:1;min-width:0}
+.sugg__name{font-size:13.5px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sugg__sub{font-size:11.5px;font-weight:600;color:var(--ink-3)}
+.sugg__price{font-size:13.5px;font-weight:800;color:var(--lime-deep);flex-shrink:0}
+.sugg__empty{padding:14px;font-size:13px;font-weight:600;color:var(--ink-3);text-align:center}
+
+/* Выбор количества на странице */
+.per-page{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  margin-top:16px;
+  font-size:12.5px;font-weight:700;color:var(--ink-3);
+}
+.pp-seg{display:flex;gap:4px;background:var(--paper);border:1.5px solid var(--line-2);border-radius:11px;padding:3px}
+.pp__btn{
+  min-width:38px;height:32px;border-radius:8px;
+  font-size:12.5px;font-weight:800;color:var(--ink-3);
+  transition:.14s;
+}
+.pp__btn:hover{color:var(--ink)}
+.pp__btn.on{background:var(--hover-wash);color:var(--lime-deep);box-shadow:inset 0 0 0 1.5px var(--lime-line)}
+
 /* Пагинация */
 .pages{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:48px}
 .pg{min-width:43px;height:43px;padding:0 8px;border-radius:12px;border:1.5px solid var(--line-2);background:var(--paper);font-size:13.5px;font-weight:800;color:var(--ink-2);transition:.16s}
@@ -261,6 +295,37 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
   .sort__btn em{display:none}
   .sort__pop{left:0;right:auto;min-width:100%}
 }
+
+
+/* Ховер-галерея на карточке: эмодзи-скрины листаются при наведении */
+.hg{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column}
+.hg__row{position:absolute;inset:auto 0 0 0;display:flex;gap:4px;padding:8px 10px;opacity:0;transition:opacity .22s}
+.item:hover .hg__row{opacity:1}
+.hg__fr{
+  flex:1;aspect-ratio:1/1;border-radius:8px;
+  background:rgba(255,255,255,.9);
+  display:grid;place-items:center;font-size:15px;
+  box-shadow:0 1px 6px rgba(0,0,0,.12);
+}
+html[data-theme="dark"] .hg__fr{background:rgba(30,35,30,.9)}
+.item:hover .item__glyph{opacity:0}
+/* ── Масштабо-устойчивость (v2.2) ── */
+body{ overflow-x:hidden }
+.hdr__in{ padding-inline:clamp(14px, 3vw, 26px); flex-wrap:nowrap; min-width:0 }
+.frame{ padding-inline:clamp(14px, 3vw, 26px) }
+.find{ min-width:120px; flex:1 1 160px }
+.find input{ padding-right:18px }
+.btn-go{ white-space:nowrap; flex-shrink:0 }
+.brand{ min-width:0 }
+.brand__name small{ white-space:nowrap }
+.acts{ min-width:0 }
+/* Сетка: auto-fill — карточки заполняют любую ширину без боковых пустот */
+.row, .sim-row{
+  grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)) !important;
+}
+@media (max-width:620px){
+  .row, .sim-row{ grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)) !important }
+}
 </style>
 </head>
 <body>
@@ -282,13 +347,14 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
     <nav class="nav" aria-label="Разделы">
       <a href="index.html" data-i18n="navHome">Главная</a>
       <a class="on" href="catalog.html" data-i18n="navCatalog">Каталог</a>
-      <a href="#" data-i18n="navHelp">Помощь</a>
+      <a href="faq.html" data-i18n="navHelp">Помощь</a>
     </nav>
 
     <div class="find">
       <svg class="find__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20.2 20.2-3.7-3.7"/></svg>
-      <input type="search" id="search" placeholder="Найти аккаунт, игру или ключ…" data-i18n-ph="searchPh" aria-label="Поиск">
+      <input type="search" id="search" placeholder="Найти аккаунт, игру или ключ…" data-i18n-ph="searchPh" aria-label="Поиск" autocomplete="off">
       <kbd>Ctrl K</kbd>
+      <div class="sugg" id="sugg" hidden></div>
     </div>
 
     <div class="acts">
@@ -371,6 +437,7 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
           <span>—</span>
           <div class="pfield"><input type="number" inputmode="numeric" id="pTo" placeholder="До" data-i18n-ph="to" aria-label="Цена до"><span class="psym" id="symTo">$</span></div>
         </div>
+        <label class="chip" id="chipSale"><span class="chip__box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10.5"/></svg></span><span class="chip__lbl" data-i18n="onlySale">Только со скидкой</span><span class="chip__n" id="nSale">0</span></label>
       </div></div></div>
     </section>
 
@@ -402,6 +469,8 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
           <button class="sort__it" data-k="rating"><span data-i18n="sortRating">По рейтингу</span> <span class="tick">✓</span></button>
           <button class="sort__it" data-k="new"><span data-i18n="sortNew">По новизне</span> <span class="tick">✓</span></button>
           <button class="sort__it" data-k="updated"><span data-i18n="sortUpdated">Недавно обновлённые</span> <span class="tick">✓</span></button>
+          <button class="sort__it" data-k="disc_big"><span data-i18n="sortDiscBig">Скидка: сначала больше</span> <span class="tick">✓</span></button>
+          <button class="sort__it" data-k="disc_small"><span data-i18n="sortDiscSmall">Скидка: сначала меньше</span> <span class="tick">✓</span></button>
         </div>
       </div>
     </div>
@@ -415,6 +484,15 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
     </div>
 
     <nav class="pages" id="pages" aria-label="Страницы"></nav>
+
+    <div class="per-page" id="perPageBox" style="display:none">
+      <span data-i18n="perPage">Товаров на странице:</span>
+      <div class="pp-seg" role="group">
+        <button class="pp__btn" data-pp="12">12</button>
+        <button class="pp__btn" data-pp="24">24</button>
+        <button class="pp__btn" data-pp="48">48</button>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -428,10 +506,10 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
       <p class="ftr__note" style="margin-top:8px">© 2026 GameStore.<br><span data-i18n="curNote">Все цены в USD. Другая валюта — для удобства просмотра.</span></p>
     </div>
     <nav class="ftr__nav">
-      <a href="#" data-i18n="ftAbout">О магазине</a>
-      <a href="#" data-i18n="ftWarranty">Гарантии</a>
-      <a href="#" data-i18n="ftPay">Оплата</a>
-      <a href="#" data-i18n="ftSupport">Поддержка</a>
+      <a href="stub.html?t=О магазине">О магазине</a>
+      <a href="guarantees.html">Гарантии</a>
+      <a href="stub.html?t=Оплата">Оплата</a>
+      <a href="faq.html">FAQ</a>
     </nav>
   </div>
 </footer>
@@ -456,11 +534,12 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
     sort: 'popular',
     page: 1,
     PER_PAGE: 12,
+    sale: false,
   };
 
   /* URL-параметры (?sort=new) */
   const urlP = new URLSearchParams(location.search);
-  if (urlP.get('sort') && ['popular','cheap','expensive','rating','new','updated'].includes(urlP.get('sort'))){
+  if (urlP.get('sort') && ['popular','cheap','expensive','rating','new','updated','disc_big','disc_small'].includes(urlP.get('sort'))){
     F.sort = urlP.get('sort');
   }
   if (urlP.get('q')) $('#search').value = urlP.get('q');
@@ -492,6 +571,28 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
   chipGroup('#fGenre', 'genres', GENRES);
   chipGroup('#fType', 'type', TYPES);
   chipGroup('#fRegion', 'region', REGIONS);
+  $('#nSale').textContent = GAMES.filter(g => g.oldPrice).length;
+
+  $('#chipSale').addEventListener('click', () => {
+    const c = $('#chipSale');
+    c.classList.toggle('on');
+    F.sale = c.classList.contains('on');
+    F.page = 1; render();
+    const dot = $('#rail .fam:has(#chipSale) .fam__btn .dot');
+    const fam = $('#chipSale').closest('.fam');
+    fam.classList.toggle('has-sel', F.sale);
+    const existing = fam.querySelector('.fam__btn .dot');
+    if (F.sale && !existing){
+      const d = document.createElement('span');
+      d.className = 'dot'; d.textContent = '☆';
+      fam.querySelector('.fam__btn').prepend(d);
+    } else if (!F.sale && existing){ existing.remove(); }
+  });
+
+  /* Аккордеоны сайдбара (клон получает свои через bindClone) */
+  $$('#rail .fam__btn').forEach(b => b.addEventListener('click', () => {
+    b.closest('.fam').classList.toggle('open');
+  }));
 
   const RATES = { USD: 1, RUB: 92.5, EUR: 0.92 };
   function toUSD(v){ return state.cur === 'USD' ? v : v / RATES[state.cur]; }
@@ -577,9 +678,56 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
 
   /* ── Поиск ── */
   let searchT;
+  const sugg = $('#sugg');
+  let hlIdx = -1;
+
+  function showSugg(){
+    const q = ($('#search').value || '').toLowerCase().trim();
+    if (q.length < 1){ sugg.hidden = true; return; }
+    const hits = GAMES.filter(g =>
+      g.title.ru.toLowerCase().includes(q) || g.title.en.toLowerCase().includes(q) ||
+      g.short.ru.toLowerCase().includes(q) || g.platform.toLowerCase().includes(q)
+    ).slice(0, 6);
+    if (!hits.length){
+      sugg.innerHTML = `<div class="sugg__empty">${L('nothingFound') || 'Ничего не найдено'}</div>`;
+      sugg.hidden = false;
+      return;
+    }
+    sugg.innerHTML = hits.map(g => `
+      <div class="sugg__it" data-id="${g.id}">
+        <span class="sugg__ico">${g.emoji}</span>
+        <span class="sugg__txt">
+          <span class="sugg__name">${g.title[lang()]}</span>
+          <span class="sugg__sub">${g.platform} · ${g.short[lang()]}</span>
+        </span>
+        <span class="sugg__price money" data-usd="${g.price}">${fmt(g.price)}</span>
+      </div>`).join('');
+    sugg.hidden = false;
+    hlIdx = -1;
+    $$('.sugg__it', sugg).forEach(it => it.addEventListener('mousedown', e => {
+      e.preventDefault();
+      location.href = `product.html?id=${it.dataset.id}`;
+    }));
+    $$('[data-usd]', sugg).forEach(el => { el.textContent = fmt(parseFloat(el.dataset.usd)); });
+  }
+
   $('#search').addEventListener('input', () => {
     clearTimeout(searchT);
+    showSugg();
     searchT = setTimeout(() => { F.page = 1; render(); }, 250);
+  });
+  $('#search').addEventListener('focus', showSugg);
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.find')) sugg.hidden = true;
+  });
+  $('#search').addEventListener('keydown', e => {
+    const items = $$('.sugg__it', sugg);
+    if (e.key === 'ArrowDown' && items.length){ e.preventDefault(); hlIdx = (hlIdx + 1) % items.length; }
+    else if (e.key === 'ArrowUp' && items.length){ e.preventDefault(); hlIdx = (hlIdx - 1 + items.length) % items.length; }
+    else if (e.key === 'Enter' && hlIdx >= 0 && items[hlIdx]){ e.preventDefault(); items[hlIdx].click(); return; }
+    else if (e.key === 'Escape'){ sugg.hidden = true; return; }
+    else return;
+    items.forEach((it, i) => it.classList.toggle('hl', i === hlIdx));
   });
 
   /* ── Фильтрация + сортировка ── */
@@ -592,9 +740,11 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
       if (F.region.size && !F.region.has(g.region)) return false;
       if (F.priceFrom !== null && g.price < F.priceFrom) return false;
       if (F.priceTo !== null && g.price > F.priceTo) return false;
+      if (F.sale && !g.oldPrice) return false;
       if (q && !(g.title.ru.toLowerCase().includes(q) || g.title.en.toLowerCase().includes(q) || g.short.ru.toLowerCase().includes(q) || g.platform.toLowerCase().includes(q))) return false;
       return true;
     });
+    const disc = g => g.oldPrice ? (1 - g.price / g.oldPrice) : 0;
     const sorters = {
       popular:  (a,b) => b.sold - a.sold,
       cheap:    (a,b) => a.price - b.price,
@@ -602,6 +752,8 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
       rating:   (a,b) => b.rating - a.rating,
       new:      (a,b) => b.added - a.added,
       updated:  (a,b) => b.updated - a.updated,
+      disc_big:   (a,b) => disc(b) - disc(a),
+      disc_small: (a,b) => disc(a) - disc(b),
     };
     list.sort(sorters[F.sort]);
     return list;
@@ -619,7 +771,9 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
                 : '';
     return `
     <article class="item" data-game-id="${g.id}" onclick="location.href='product.html?id=${g.id}'">
-      <div class="item__pic">${art}<span class="item__glyph">${g.emoji}</span>${badge}<button class="star" aria-label="В желаемое" onclick="event.stopPropagation()">☆</button><span class="item__plat">${g.platform}</span></div>
+      <div class="item__pic">${art}<span class="item__glyph">${g.emoji}</span>${badge}<button class="star" aria-label="В желаемое" onclick="event.stopPropagation()">☆</button><span class="item__plat">${g.platform}</span>
+        <div class="hg"><div class="hg__row">${(g.media||[]).slice(0,4).map(m => `<span class="hg__fr">${m.emoji}</span>`).join('')}</div></div>
+      </div>
       <div class="item__info">
         <h3 class="item__name">${g.title[lang()]}</h3>
         <div class="item__sub">${g.short[lang()]}</div>
@@ -649,6 +803,8 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
     $('#grid').style.display = total ? 'grid' : 'none';
 
     const pagesBox = $('#pages');
+    $('#perPageBox').style.display = total > 12 ? 'flex' : 'none';
+    $$('.pp__btn').forEach(b => b.classList.toggle('on', +b.dataset.pp === F.PER_PAGE));
     if (pages <= 1){ pagesBox.innerHTML = ''; }
     else {
       let html = `<button class="pg" data-p="${F.page-1}" ${F.page===1?'disabled style="opacity:.4"':''}>←</button>`;
@@ -664,6 +820,16 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
       }));
     }
 
+    $$('.pp__btn').forEach(b => {
+      if (b._ppBound) return;
+      b._ppBound = true;
+      b.addEventListener('click', () => {
+        F.PER_PAGE = parseInt(b.dataset.pp);
+        F.page = 1;
+        render();
+      });
+    });
+
     // применить формат цен к новым узлам
     $$('[data-usd]').forEach(el => { el.textContent = fmt(parseFloat(el.dataset.usd)); });
     // восстановить звёзды
@@ -676,8 +842,9 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
   /* ── Сброс фильтров ── */
   const clearAll = () => {
     F.platform.clear(); F.genre.clear(); F.type.clear(); F.region.clear();
-    F.priceFrom = F.priceTo = null;
+    F.priceFrom = F.priceTo = null; F.sale = false;
     $('#pFrom').value = ''; $('#pTo').value = '';
+    $('#chipSale').classList.remove('on');
     $$('#rail .chip.on').forEach(c => c.classList.remove('on'));
     $$('#rail .fam__btn .dot').forEach(d => d.remove());
     F.page = 1;

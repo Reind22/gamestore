@@ -75,6 +75,7 @@ const GS = (() => {
     fee:'Комиссия платёжной системы', toPay:'К оплате', checkout:'Перейти к оплате',
     continue:'Продолжить покупки', payMore:'и другие',
     cartAddMsg2:'Добавлено в корзину',
+    onlySale:'Только со скидкой', sortDiscBig:'Скидка: сначала больше', sortDiscSmall:'Скидка: сначала меньше', perPage:'Товаров на странице:', nothingFound:'Ничего не найдено',
     from:'От', to:'До',
     buyNow:'Купить сейчас', toCart:'Добавить в корзину', inCart:'В корзине',
     guarantee:'Гарантия 30 дней', delivery:'Мгновенная выдача',
@@ -341,6 +342,158 @@ const GS = (() => {
     });
   }
 
+
+  /* ── Чат-виджет: кружок → ТГ + окно чата ── */
+  function buildChat(){
+    if (document.getElementById('gs-chat')) return;
+    const TG_LINK = 'https://t.me/gamestore_support_bot'; // ← заменить на своего бота
+    const wrap = document.createElement('div');
+    wrap.id = 'gs-chat';
+    wrap.innerHTML = `
+    <style>
+      #gs-chat{position:fixed;right:20px;bottom:20px;z-index:500}
+      #gs-chat .fab{
+        width:56px;height:56px;border-radius:50%;
+        background:linear-gradient(140deg,#5CFF5C,var(--lime) 45%,#00D400);
+        color:var(--lime-ink);
+        display:grid;place-items:center;
+        box-shadow:0 8px 24px rgba(0,220,60,.45), inset 0 1px 0 rgba(255,255,255,.5);
+        cursor:pointer;border:none;
+        transition:transform .2s var(--ease), box-shadow .2s;
+      }
+      #gs-chat .fab:hover{transform:scale(1.08)}
+      #gs-chat .fab svg{width:26px;height:26px}
+      #gs-chat .fab .x{display:none}
+      #gs-chat.open .fab .bubble{display:none}
+      #gs-chat.open .fab .x{display:block}
+      #gs-chat .tg{
+        position:absolute;right:8px;bottom:70px;
+        width:46px;height:46px;border-radius:50%;
+        background:var(--paper);color:#229ED9;
+        display:grid;place-items:center;
+        box-shadow:var(--sh-2, 0 8px 24px rgba(0,0,0,.2));
+        border:1.5px solid var(--line-2,#D8DDD8);
+        opacity:0;pointer-events:none;transform:translateY(10px) scale(.7);
+        transition:.25s var(--ease);
+      }
+      #gs-chat.open .tg{opacity:1;pointer-events:auto;transform:none}
+      #gs-chat .tg:hover{transform:scale(1.1)}
+      #gs-chat .tg svg{width:23px;height:23px}
+      #gs-chat .win{
+        position:absolute;right:0;bottom:70px;
+        width:min(320px, calc(100vw - 40px));height:400px;
+        background:var(--paper,#fff);border:1px solid var(--line,#E4E7E4);
+        border-radius:18px;box-shadow:0 18px 48px rgba(0,0,0,.22);
+        display:flex;flex-direction:column;overflow:hidden;
+        opacity:0;pointer-events:none;transform:translateY(14px) scale(.96);
+        transform-origin:bottom right;
+        transition:.25s var(--ease);
+      }
+      #gs-chat.open .win{opacity:1;pointer-events:auto;transform:none}
+      #gs-chat .win__head{
+        padding:14px 16px;
+        background:linear-gradient(140deg,#5CFF5C,var(--lime) 45%,#00D400);
+        color:var(--lime-ink,#053B05);
+        display:flex;align-items:center;gap:10px;
+      }
+      #gs-chat .win__head .av{width:34px;height:34px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:17px}
+      #gs-chat .win__head b{font-size:14px;font-weight:800;display:block}
+      #gs-chat .win__head small{font-size:10.5px;font-weight:700;opacity:.75;display:flex;align-items:center;gap:5px}
+      #gs-chat .win__head small::before{content:'';width:7px;height:7px;border-radius:50%;background:#0A7A0A;display:inline-block}
+      #gs-chat .win__body{
+        flex:1;overflow-y:auto;padding:14px;
+        display:flex;flex-direction:column;gap:9px;
+        background:var(--bg,#F0F0F0);
+      }
+      #gs-chat .msg{max-width:82%;padding:9px 13px;border-radius:13px;font-size:12.5px;font-weight:600;line-height:1.5}
+      #gs-chat .msg.bot{background:var(--paper,#fff);color:var(--ink,#171B17);border:1px solid var(--line,#E4E7E4);align-self:flex-start;border-bottom-left-radius:4px}
+      #gs-chat .msg.me{background:var(--lime-deep,#0ECC0E);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+      #gs-chat .win__input{
+        display:flex;gap:8px;padding:10px;border-top:1px solid var(--line,#E4E7E4);
+        background:var(--paper,#fff);
+      }
+      #gs-chat .win__input input{
+        flex:1;height:38px;padding:0 13px;border:1.5px solid var(--line-2,#D8DDD8);
+        border-radius:10px;font:inherit;font-size:12.5px;font-weight:600;
+        background:var(--bg,#F0F0F0);color:var(--ink,#171B17);outline:none;
+      }
+      #gs-chat .win__input input:focus{border-color:var(--lime-deep)}
+      #gs-chat .win__input button{
+        width:38px;height:38px;border-radius:10px;
+        background:var(--lime-deep,#0ECC0E);color:#fff;
+        display:grid;place-items:center;flex-shrink:0;
+      }
+      #gs-chat .win__input button svg{width:16px;height:16px}
+    </style>
+    <button class="fab" aria-label="Чат поддержки">
+      <svg class="bubble" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5c-1.6 0-3.1-.4-4.4-1.2L3 20l1.2-4.1A8.5 8.5 0 1 1 21 11.5z"/></svg>
+      <svg class="x" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <a class="tg" href="${TG_LINK}" target="_blank" rel="noopener" aria-label="Telegram-бот" title="Telegram-бот">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.7 3.3 2.9 10.6c-1.2.5-1.2 1.2-.2 1.5l4.8 1.5 1.8 5.6c.2.6.4.8 1 .8.5 0 .7-.2 1-.5l2.4-2.3 4.9 3.6c.9.5 1.6.2 1.8-.9l3.2-15.2c.3-1.3-.5-1.9-1.9-1.4zM7.9 13.3l10.4-6.6c.5-.3 1-.1.6.2l-8.9 8-.4 3.4-1.7-5z"/></svg>
+    </a>
+    <div class="win">
+      <div class="win__head">
+        <span class="av">🎧</span>
+        <div><b>Поддержка GameStore</b><small>онлайн · отвечаем ~15 минут</small></div>
+      </div>
+      <div class="win__body" id="gs-chat-body">
+        <div class="msg bot">Привет! Это поддержка GameStore. Опишите вопрос — ответим в течение 15 минут. Для быстрой связи круглосуточно — жмите иконку Telegram выше.</div>
+      </div>
+      <div class="win__input">
+        <input type="text" placeholder="Ваше сообщение…" aria-label="Сообщение">
+        <button aria-label="Отправить">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>
+        </button>
+      </div>
+    </div>`;
+
+    document.body.appendChild(wrap);
+    const fab = wrap.querySelector('.fab');
+    fab.addEventListener('click', () => wrap.classList.toggle('open'));
+
+    const input = wrap.querySelector('input');
+    const body = wrap.querySelector('#gs-chat-body');
+    const send = () => {
+      const v = input.value.trim();
+      if (!v) return;
+      body.insertAdjacentHTML('beforeend', `<div class="msg me"></div>`);
+      body.lastElementChild.textContent = v;
+      input.value = '';
+      body.scrollTop = body.scrollHeight;
+      setTimeout(() => {
+        body.insertAdjacentHTML('beforeend', '<div class="msg bot">Сообщение received! Оператор подключится в течение 15 минут. Быстрее — в Telegram-боте 👆</div>');
+        body.scrollTop = body.scrollHeight;
+      }, 900);
+    };
+    wrap.querySelector('.win__input button').addEventListener('click', send);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+  }
+
+
+  /* ── Прогресс-линия загрузки под шапкой ── */
+  function buildLoadBar(){
+    if (document.getElementById('gs-loadbar-style')) return;
+    const st = document.createElement('style');
+    st.id = 'gs-loadbar-style';
+    st.textContent = `
+      @keyframes gs-loadbar{0%{left:-35%}45%{left:35%}100%{left:105%}}
+      .hdr::after{transition:none}
+      body.gs-loading .hdr::after{
+        opacity:.95 !important;
+        background:linear-gradient(90deg, transparent, var(--lime) 50%, transparent) !important;
+      }
+      body.gs-loading .hdr::after{ animation: gs-loadbar 1.1s ease-in-out infinite; }
+    `;
+    document.head.appendChild(st);
+    document.body.classList.add('gs-loading');
+    window.addEventListener('load', () => {
+      document.body.classList.remove('gs-loading');
+    });
+    // страховка: если load не сработал за 4с — снять
+    setTimeout(() => document.body.classList.remove('gs-loading'), 4000);
+  }
+
   /* ── Инициализация общих обработчиков ── */
   function init(){
     applyTheme();
@@ -348,6 +501,8 @@ const GS = (() => {
     wishBind();
     buildDropdowns();
     updateCartPip();
+    buildChat();
+    buildLoadBar();
 
     $$('[data-set-theme]').forEach(b => b.addEventListener('click', () => {
       state.theme = b.dataset.setTheme;

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameStore</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#F0F0F0; --paper:#FFFFFF; --hover-wash:#F0F8F0;
+  --lime:#00FF00; --lime-deep:#0ECC0E; --lime-ink:#053B05; --lime-line:#C4ECC4;
+  --ink:#171B17; --ink-2:#545B54; --ink-3:#969E96;
+  --line:#E4E7E4; --line-2:#D8DDD8;
+  --hdr-bg:rgba(255,255,255,.86);
+  --sh-1:0 1px 2px rgba(23,27,23,.05),0 3px 12px rgba(23,27,23,.05);
+  --r-m:14px; --r-l:18px;
+}
+html[data-theme="dark"]{
+  --bg:#101310; --paper:#191D19; --hover-wash:#1C2A1C;
+  --lime:#3DFF3D; --lime-deep:#2FE22F; --lime-ink:#052B05; --lime-line:#2A4A2A;
+  --ink:#E8ECE8; --ink-2:#A8B0A8; --ink-3:#6B756B;
+  --line:#262B26; --line-2:#313831;
+  --hdr-bg:rgba(20,24,20,.86);
+  --sh-1:0 1px 2px rgba(0,0,0,.3),0 3px 12px rgba(0,0,0,.25);
+}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{font:inherit;border:none;background:none;color:inherit;cursor:pointer}
+svg{display:block}
+.hdr{position:sticky;top:0;z-index:130;background:var(--hdr-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hdr::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent 0%,var(--lime) 18%,var(--lime) 82%,transparent 100%);opacity:.5}
+.hdr__in{max-width:1400px;margin:0 auto;padding:13px 26px;display:flex;align-items:center;gap:18px;padding-inline:clamp(14px,3vw,26px)}
+.brand{display:flex;align-items:center;gap:11px}
+.brand__mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(140deg,#7DFF7D 0%,var(--lime) 42%,#00C400 100%);display:grid;place-items:center;box-shadow:0 3px 14px rgba(0,220,60,.4)}
+.brand__mark svg{width:22px;height:22px}
+.brand__name{font-size:21px;font-weight:800;letter-spacing:-.7px;background:linear-gradient(120deg,#00D400,#00FF40 55%,#00C800);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand__name small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.24em;color:var(--ink-3);-webkit-text-fill-color:var(--ink-3);margin-top:2px}
+.frame{max-width:800px;margin:0 auto;padding:60px 26px 80px}
+.chip{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:8px 16px;border-radius:99px;
+  background:var(--hover-wash);color:var(--lime-deep);
+  font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--lime-line);
+}
+h1{font-size:32px;font-weight:800;letter-spacing:-.8px;margin:18px 0 12px}
+.sub{font-size:15.5px;font-weight:600;color:var(--ink-3);line-height:1.6;margin-bottom:34px}
+.card{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r-l);
+  box-shadow:var(--sh-1);padding:26px;
+}
+.card h3{font-size:16px;font-weight:800;margin-bottom:10px}
+.card p{font-size:14px;font-weight:500;color:var(--ink-2);line-height:1.7}
+.back{
+  display:inline-flex;align-items:center;gap:8px;margin-top:28px;
+  height:44px;padding:0 24px;border-radius:13px;
+  background:linear-gradient(140deg,#5CFF5C,var(--lime) 45%,#00D400);
+  color:var(--lime-ink);font-size:14px;font-weight:800;
+  box-shadow:0 4px 16px rgba(0,220,60,.38);
+}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr__in">
+    <a class="brand" href="index.html">
+      <span class="brand__mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#053B05" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 11.5h4M8 9.5v4"/>
+          <circle cx="15.2" cy="10.7" r=".9" fill="#053B05" stroke="none"/>
+          <circle cx="17.8" cy="12.7" r=".9" fill="#053B05" stroke="none"/>
+          <path d="M17.3 5.5H6.7a4 4 0 0 0-3.97 3.56c-.27 2.1-.45 4.3-.45 5.5 0 2.62 1.6 3.97 3.86 3.97 1.28 0 2.23-.56 3-1.32l.9-.9a2.6 2.6 0 0 1 3.9.02l.88.9c.78.76 1.72 1.3 3 1.3 2.26 0 3.86-1.35 3.86-3.97 0-1.2-.18-3.4-.45-5.5A4 4 0 0 0 17.3 5.5z"/>
+        </svg>
+      </span>
+      <span class="brand__name">GameStore<small>ЭКСКЛЮЗИВНЫЕ АККАУНТЫ</small></span>
+    </a>
+  </div>
+</header>
+<div class="frame">
+  <span class="chip">Скоро</span>
+  <h1 id="ttl">Страница в разработке</h1>
+  <p class="sub">Мы готовим этот раздел. Загляните позже — будет полезно.</p>
+  <div class="card">
+    <h3>Что уже работает</h3>
+    <p>Каталог с фильтрами, карточки товаров, корзина и избранное. А этот раздел добавим в ближайших обновлениях.</p>
+  </div>
+  <a class="back" href="index.html">← На главную</a>
+</div>
+<script>
+  const t = new URLSearchParams(location.search).get('t');
+  if (t) document.getElementById('ttl').textContent = t;
+  document.title = t ? t + ' — GameStore' : 'GameStore';
+</script>
+</body>
+</html>

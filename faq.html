@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ — GameStore</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#F0F0F0; --paper:#FFFFFF; --hover-wash:#F0F8F0;
+  --lime:#00FF00; --lime-deep:#0ECC0E; --lime-ink:#053B05; --lime-line:#C4ECC4;
+  --ink:#171B17; --ink-2:#545B54; --ink-3:#969E96;
+  --line:#E4E7E4; --line-2:#D8DDD8;
+  --hdr-bg:rgba(255,255,255,.86);
+  --sh-1:0 1px 2px rgba(23,27,23,.05),0 3px 12px rgba(23,27,23,.05);
+  --r-m:14px; --r-l:18px;
+  --ease:cubic-bezier(.22,.75,.28,1);
+}
+html[data-theme="dark"]{
+  --bg:#101310; --paper:#191D19; --hover-wash:#1C2A1C;
+  --lime:#3DFF3D; --lime-deep:#2FE22F; --lime-ink:#052B05; --lime-line:#2A4A2A;
+  --ink:#E8ECE8; --ink-2:#A8B0A8; --ink-3:#6B756B;
+  --line:#262B26; --line-2:#313831;
+  --hdr-bg:rgba(20,24,20,.86);
+  --sh-1:0 1px 2px rgba(0,0,0,.3),0 3px 12px rgba(0,0,0,.25);
+}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;border:none;background:none;color:inherit;cursor:pointer}
+svg{display:block}
+.hdr{position:sticky;top:0;z-index:130;background:var(--hdr-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hdr::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent 0%,var(--lime) 18%,var(--lime) 82%,transparent 100%);opacity:.5}
+.hdr__in{max-width:1400px;margin:0 auto;padding:13px clamp(14px,3vw,26px);display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand__mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(140deg,#7DFF7D 0%,var(--lime) 42%,#00C400 100%);display:grid;place-items:center;box-shadow:0 3px 14px rgba(0,220,60,.4)}
+.brand__mark svg{width:22px;height:22px}
+.brand__name{font-size:21px;font-weight:800;letter-spacing:-.7px;background:linear-gradient(120deg,#00D400,#00FF40 55%,#00C800);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand__name small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.24em;color:var(--ink-3);-webkit-text-fill-color:var(--ink-3);margin-top:2px}
+.frame{max-width:760px;margin:0 auto;padding:50px 26px 80px}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink-3);margin-bottom:18px}
+.crumb a:hover{color:var(--lime-deep)}
+h1{font-size:34px;font-weight:800;letter-spacing:-.8px;margin-bottom:12px}
+.lead{font-size:15.5px;font-weight:600;color:var(--ink-2);line-height:1.6;margin-bottom:30px}
+.faq{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-l);box-shadow:var(--sh-1);overflow:hidden;margin-bottom:34px}
+.q{
+  width:100%;text-align:left;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:18px 22px;
+  font-size:15px;font-weight:800;color:var(--ink);
+  border-bottom:1px solid var(--line);
+  transition:background .15s;
+}
+.q:hover{background:var(--hover-wash)}
+.q .chev{
+  flex-shrink:0;width:26px;height:26px;border-radius:8px;
+  display:grid;place-items:center;
+  color:var(--ink-3);font-size:11px;
+  transition:transform .28s var(--ease);
+}
+.q-it.open .chev{transform:rotate(-180deg);color:var(--lime-deep)}
+.q-it:last-child .q{border-bottom:none}
+.a{
+  display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .3s var(--ease);
+}
+.q-it.open .a{grid-template-rows:1fr}
+.a>div{overflow:hidden}
+.a p{
+  padding:16px 22px 20px;
+  font-size:14px;font-weight:500;color:var(--ink-2);line-height:1.7;
+  border-bottom:1px solid var(--line);
+}
+.q-it:last-child .a p{border-bottom:none}
+.cat-ttl{
+  font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-3);margin:28px 0 10px;
+}
+.back{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 24px;border-radius:13px;background:linear-gradient(140deg,#5CFF5C,var(--lime) 45%,#00D400);color:var(--lime-ink);font-size:14px;font-weight:800;box-shadow:0 4px 16px rgba(0,220,60,.38);margin-top:6px}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr__in">
+    <a class="brand" href="index.html">
+      <span class="brand__mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#053B05" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 11.5h4M8 9.5v4"/>
+          <circle cx="15.2" cy="10.7" r=".9" fill="#053B05" stroke="none"/>
+          <circle cx="17.8" cy="12.7" r=".9" fill="#053B05" stroke="none"/>
+          <path d="M17.3 5.5H6.7a4 4 0 0 0-3.97 3.56c-.27 2.1-.45 4.3-.45 5.5 0 2.62 1.6 3.97 3.86 3.97 1.28 0 2.23-.56 3-1.32l.9-.9a2.6 2.6 0 0 1 3.9.02l.88.9c.78.76 1.72 1.3 3 1.3 2.26 0 3.86-1.35 3.86-3.97 0-1.2-.18-3.4-.45-5.5A4 4 0 0 0 17.3 5.5z"/>
+        </svg>
+      </span>
+      <span class="brand__name">GameStore<small>ЭКСКЛЮЗИВНЫЕ АККАУНТЫ</small></span>
+    </a>
+  </div>
+</header>
+
+<div class="frame">
+  <nav class="crumb"><a href="index.html">Главная</a> / <span>FAQ</span></nav>
+  <h1>Частые вопросы</h1>
+  <p class="lead">Собрали всё, что спрашивают чаще всего. Не нашли ответ — напишите в чат (кружок справа внизу) или в Telegram-бот, отвечаем круглосуточно.</p>
+
+  <div class="cat-ttl">Покупка</div>
+  <div class="faq" id="faq1"></div>
+
+  <div class="cat-ttl">Безопасность</div>
+  <div class="faq" id="faq2"></div>
+
+  <div class="cat-ttl">Оплата и возврат</div>
+  <div class="faq" id="faq3"></div>
+
+  <a class="back" href="index.html">← На главную</a>
+</div>
+
+<script>
+const FAQ = {
+  faq1: [
+    ['Как происходит передача аккаунта?', 'После оплаты данные (логин, пароль, инструкция по смене почты) приходят мгновенно — на экран и на email, указанный при оплате. Никакого ожидания оператора: всё автоматизировано и работает круглосуточно.'],
+    ['Аккаунт закрепляется за мной навсегда?', 'Да. На всех аккаунтах, где платформа позволяет смену данных, вы меняете почту и пароль на свои. После этого аккаунт полностью ваш — у нас не остаётся доступа. Если смена невозможна технически (например, на консольных аккаунтах), это указано в описании товара.'],
+    ['Что такое «часы наиграно» и почему это важно?', 'Это суммарное время в играх на аккаунте. Большое количество часов — признак «живого» аккаунта с историей: такие реже попадают под подозрения платформ и обычно стабильнее.'],
+    ['Можно ли докупать игры на купленный аккаунт?', 'На аккаунтах Steam — да, вы можете пополнять кошелёк и покупать игры сами. Исключения указаны в описании конкретного товара.'],
+  ],
+  faq2: [
+    ['Аккаунт может быть заблокирован после покупки?', 'Мы продаём аккаунты, созданные легально, без читов и взломов. Риск блокировки минимален. Если блокировка всё же случилась в течение 30 дней не по вашей вине (читы, буст, нарушения правил платформы с вашей стороны) — заменим аккаунт или вернём деньги по гарантии.'],
+    ['Какие у вас гарантии, если это скам?', 'GameStore — не анонимный продавец: сайт с многолетней историей, публичные отзывы, официальная форма оплаты с чеками. Все обязательства описаны на странице «Гарантии». Мы не просим ничего «подтверждать» в личке — любые такие сообщения от «поддержки» вне сайта — мошенники.'],
+    ['Вы требуете пароль от моего Steam?', 'Никогда. Для покупки вообще не нужен ваш Steam-аккаунт. Вход через Steam на сайте используется только для удобства — мы не запрашиваем и не храним ваши платёжные реквизиты.'],
+  ],
+  faq3: [
+    ['Какие способы оплаты?', 'Криптовалюта (BTC, USDT, TON и другие) и банковские карты. Крипта — без комиссий за пополнение с нашей стороны, карта — через защищённый шлюз. Расчётный язык сайта — доллар США: цены в других валютах показаны для удобства и конвертируются по текущему курсу.'],
+    ['Как вернуть деньги, если передумал?', 'До момента выдачи данных — возврат 100% без объяснения причин в течение 24 часов. После выдачи действует гарантия 30 дней: нерабочий товар меняем или возвращаем деньги.'],
+    ['Почему цены в долларах?', 'Это базовая валюта расчётов: так цены честные и не зависят от скачков курса конверсии. Вы видите в рублях/евро примерную сумму для удобства, а оплата проходит в USD по курсу платёжной системы.'],
+    ['Есть ли комиссия за оплату?', 'Платёжная система берёт небольшую комиссию (~2%) — она показывается отдельной строкой в корзине до оплаты, без скрытых доплат.'],
+  ],
+};
+
+function renderFaq(boxId, items){
+  const box = document.getElementById(boxId);
+  box.innerHTML = items.map(([q, a], i) => `
+    <div class="q-it${i === 0 ? ' open' : ''}">
+      <button class="q">${q}<span class="chev">▼</span></button>
+      <div class="a"><div><p>${a}</p></div></div>
+    </div>`).join('');
+  box.querySelectorAll('.q').forEach(b => b.addEventListener('click', () => {
+    b.closest('.q-it').classList.toggle('open');
+  }));
+}
+renderFaq('faq1', FAQ.faq1);
+renderFaq('faq2', FAQ.faq2);
+renderFaq('faq3', FAQ.faq3);
+</script>
+</body>
+</html>

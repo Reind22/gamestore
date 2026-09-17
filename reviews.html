@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Отзывы — GameStore</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#F0F0F0; --paper:#FFFFFF; --hover-wash:#F0F8F0;
+  --lime:#00FF00; --lime-deep:#0ECC0E; --lime-ink:#053B05; --lime-line:#C4ECC4;
+  --ink:#171B17; --ink-2:#545B54; --ink-3:#969E96;
+  --line:#E4E7E4; --line-2:#D8DDD8; --gold:#FFD84D;
+  --hdr-bg:rgba(255,255,255,.86);
+  --sh-1:0 1px 2px rgba(23,27,23,.05),0 3px 12px rgba(23,27,23,.05);
+  --r-m:14px; --r-l:18px;
+  --ease:cubic-bezier(.22,.75,.28,1);
+}
+html[data-theme="dark"]{
+  --bg:#101310; --paper:#191D19; --hover-wash:#1C2A1C;
+  --lime:#3DFF3D; --lime-deep:#2FE22F; --lime-ink:#052B05; --lime-line:#2A4A2A;
+  --ink:#E8ECE8; --ink-2:#A8B0A8; --ink-3:#6B756B;
+  --line:#262B26; --line-2:#313831;
+  --hdr-bg:rgba(20,24,20,.86);
+  --sh-1:0 1px 2px rgba(0,0,0,.3),0 3px 12px rgba(0,0,0,.25);
+}
+body{font-family:'Manrope',system-ui,sans-serif;background:radial-gradient(1100px 500px at 85% -8%, rgba(0,255,0,.045), transparent 62%),var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
+a{color:inherit;text-decoration:none}
+button{font:inherit;border:none;background:none;color:inherit;cursor:pointer}
+svg{display:block}
+.hdr{position:sticky;top:0;z-index:130;background:var(--hdr-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hdr::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent 0%,var(--lime) 18%,var(--lime) 82%,transparent 100%);opacity:.5}
+.hdr__in{max-width:1400px;margin:0 auto;padding:13px clamp(14px,3vw,26px);display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand__mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(140deg,#7DFF7D 0%,var(--lime) 42%,#00C400 100%);display:grid;place-items:center;box-shadow:0 3px 14px rgba(0,220,60,.4)}
+.brand__mark svg{width:22px;height:22px}
+.brand__name{font-size:21px;font-weight:800;letter-spacing:-.7px;background:linear-gradient(120deg,#00D400,#00FF40 55%,#00C800);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand__name small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.24em;color:var(--ink-3);-webkit-text-fill-color:var(--ink-3);margin-top:2px}
+.frame{max-width:900px;margin:0 auto;padding:50px 26px 80px}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink-3);margin-bottom:18px}
+.crumb a:hover{color:var(--lime-deep)}
+h1{font-size:34px;font-weight:800;letter-spacing:-.8px;margin-bottom:10px}
+.stats{
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  margin-bottom:34px;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r-l);
+  box-shadow:var(--sh-1);padding:20px 24px;
+}
+.stats .big{font-size:40px;font-weight:800;color:var(--lime-deep);line-height:1}
+.stats .stars{font-size:17px;color:var(--gold);letter-spacing:2px;margin:4px 0}
+.stats small{font-size:12.5px;font-weight:700;color:var(--ink-3)}
+.rv{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r-l);
+  box-shadow:var(--sh-1);padding:20px 22px;margin-bottom:13px;
+}
+.rv-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.rv-av{
+  width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  display:grid;place-items:center;font-size:18px;font-weight:800;color:#fff;
+}
+.rv-name{font-size:14px;font-weight:800}
+.rv-meta{font-size:11.5px;font-weight:600;color:var(--ink-3);margin-top:2px}
+.rv-stars{margin-left:auto;color:var(--gold);font-size:14px;letter-spacing:2px}
+.rv-item{
+  display:inline-block;
+  font-size:11px;font-weight:800;color:var(--lime-deep);
+  background:var(--hover-wash);border:1px solid var(--lime-line);
+  padding:3.5px 10px;border-radius:99px;margin-bottom:10px;
+}
+.rv-text{font-size:14px;font-weight:500;color:var(--ink-2);line-height:1.7}
+.cta{
+  text-align:center;margin-top:36px;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r-l);
+  padding:28px;
+}
+.cta h3{font-size:17px;font-weight:800;margin-bottom:8px}
+.cta p{font-size:13.5px;font-weight:600;color:var(--ink-3);margin-bottom:16px}
+.cta a{
+  display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 26px;
+  border-radius:13px;background:linear-gradient(140deg,#5CFF5C,var(--lime) 45%,#00D400);
+  color:var(--lime-ink);font-size:14px;font-weight:800;
+  box-shadow:0 4px 16px rgba(0,220,60,.38);
+}
+.back{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 24px;border-radius:13px;background:linear-gradient(140deg,#5CFF5C,var(--lime) 45%,#00D400);color:var(--lime-ink);font-size:14px;font-weight:800;box-shadow:0 4px 16px rgba(0,220,60,.38);margin-top:30px}
+@media (max-width:620px){ h1{font-size:27px} .frame{padding:36px 16px 64px} }
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr__in">
+    <a class="brand" href="index.html">
+      <span class="brand__mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#053B05" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 11.5h4M8 9.5v4"/>
+          <circle cx="15.2" cy="10.7" r=".9" fill="#053B05" stroke="none"/>
+          <circle cx="17.8" cy="12.7" r=".9" fill="#053B05" stroke="none"/>
+          <path d="M17.3 5.5H6.7a4 4 0 0 0-3.97 3.56c-.27 2.1-.45 4.3-.45 5.5 0 2.62 1.6 3.97 3.86 3.97 1.28 0 2.23-.56 3-1.32l.9-.9a2.6 2.6 0 0 1 3.9.02l.88.9c.78.76 1.72 1.3 3 1.3 2.26 0 3.86-1.35 3.86-3.97 0-1.2-.18-3.4-.45-5.5A4 4 0 0 0 17.3 5.5z"/>
+        </svg>
+      </span>
+      <span class="brand__name">GameStore<small>ЭКСКЛЮЗИВНЫЕ АККАУНТЫ</small></span>
+    </a>
+  </div>
+</header>
+
+<div class="frame">
+  <nav class="crumb"><a href="index.html">Главная</a> / <span>Отзывы</span></nav>
+  <h1>Отзывы покупателей</h1>
+
+  <div class="stats">
+    <div>
+      <div class="big">4.8</div>
+      <div class="stars">★★★★★</div>
+    </div>
+    <div>
+      <small><b style="font-size:15px;color:var(--ink)">1 847</b> отзывов<br>за всё время работы</small>
+    </div>
+    <div>
+      <small><b style="font-size:15px;color:var(--ink)">97%</b> покупателей<br>оценка 5 из 5</small>
+    </div>
+    <div>
+      <small><b style="font-size:15px;color:var(--ink)">2 400+</b> успешных<br>сделок</small>
+    </div>
+  </div>
+
+  <div id="rvList"></div>
+
+  <div class="cta">
+    <h3>Купили у нас? Расскажите, как всё прошло</h3>
+    <p>Отзыв публикуется после проверки — это помогает другим покупателям</p>
+    <a href="#" onclick="alert('Демо: форма отзыва появится после подключения личного кабинета'); return false">Оставить отзыв</a>
+  </div>
+
+  <a class="back" href="index.html">← На главную</a>
+</div>
+
+<script src="gs_data.js"></script>
+<script>
+const REVIEWS = [
+  { n:'Дмитрий К.', d:'12 сентября 2026', a:'#2E7D32', g:'Д', s:5, item:'Steam + 50 игр',
+    t:'Брал аккаунт с 50 играми. Всё ровно как в описании: CS2 с праймом, часы наиграны, почта сменилась без танцев с бубном. Поддержка ответила за 10 минут, помогли со сменой данных. Рекомендую.' },
+  { n:'Алексей М.', d:'8 сентября 2026', a:'#C62828', g:'А', s:5, item:'CS2 Prime + скины',
+    t:'Честно, думал развод — цены подозрительно низкие. Но оплата прошла, данные пришли мгновенно, AK Redline на месте, ранг соответствует. Пол года пользуюсь — полёт нормальный.' },
+  { n:'Марат С.', d:'5 сентября 2026', a:'#1565C0', g:'М', s:5, item:'Dota 2 Immortal',
+    t:'Immortal 6200 MMR с арканами. Продавец перед покупкой прислал скрины инвентаря и статистики. Гарантия 30 дней зафиксирована в чеке — это решает.' },
+  { n:'Игорь В.', d:'1 сентября 2026', a:'#6A1B9A', g:'И', s:4, item:'GTA V Premium',
+    t:'Всё ок, единственное — пришлось немного подождать вывода на почту (10 минут). 10 млн на балансе на месте, уровень 120. Покупал ночью в 3 часа — выдача автоматическая, без ожидания утра.' },
+  { n:'Сергей П.', d:'28 августа 2026', a:'#00695C', g:'С', s:5, item:'Minecraft Java + Bedrock',
+    t:'Покупал сыну. Инструкция по смене никнейма приложена, всё сделал сам за 5 минут. Второй раз здесь — первый аккаунт год в работе, проблем ноль.' },
+  { n:'Владислав Т.', d:'25 августа 2026', a:'#E65100', g:'В', s:5, item:'Rust + все DLC',
+    t:'4200 часов наиграно, скины из описания все на месте. Аккаунт без банов, что для Rust главное. Оплатил USDT — пришло мгновенно.' },
+  { n:'Никита Р.', d:'20 августа 2026', a:'#283593', g:'Н', s:5, item:'Epic Games + Fortnite',
+    t:'Renegade Raider нашёл только здесь, у других маркетов цена была в 1.5 раза выше. Батл-пасс активен, ВБ на месте.' },
+  { n:'Олег Д.', d:'15 августа 2026', a:'#37474F', g:'О', s:4, item:'Cyberpunk 2077 + PL',
+    t:'Phantom Liberty работает, DLC активирован. Купил для сына — играет третий день. Оплата в USDT прошла за минуту, чек на почте.' },
+  { n:'Артём Ж.', d:'10 августа 2026', a:'#7B1FA2', g:'А', s:5, item:'Valorant — все агенты',
+    t:'Все агенты открыты, скины Prime Vandal и Reaver — как обещали. Ранг Diamond. Почта сменяемая, привязал свою за 2 минуты.' },
+  { n:'Роман Б.', d:'5 августа 2026', a:'#455A64', g:'Р', s:5, item:'FC 24 + Ultimate Team',
+    t:'850K монет, Мбаппе и Холанд в клубе. Div 3. За эту цену — подарок, у EA такие игроки стоят дороже самого аккаунта.' },
+];
+
+const avColors = ['#2E7D32','#C62828','#1565C0','#6A1B9A','#00695C','#E65100','#283593','#37474F'];
+document.getElementById('rvList').innerHTML = REVIEWS.map(r => `
+  <div class="rv">
+    <div class="rv-head">
+      <span class="rv-av" style="background:${r.a}">${r.g}</span>
+      <div>
+        <div class="rv-name">${r.n}</div>
+        <div class="rv-meta">${r.d}</div>
+      </div>
+      <span class="rv-stars">${'★'.repeat(r.s)}${'☆'.repeat(5 - r.s)}</span>
+    </div>
+    <span class="rv-item">Покупка: ${r.item}</span>
+    <div class="rv-text">${r.t}</div>
+  </div>`).join('');
+</script>
+</body>
+</html>

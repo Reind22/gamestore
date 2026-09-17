@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Гарантии — GameStore</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#F0F0F0; --paper:#FFFFFF; --hover-wash:#F0F8F0;
+  --lime:#00FF00; --lime-deep:#0ECC0E; --lime-ink:#053B05; --lime-line:#C4ECC4;
+  --ink:#171B17; --ink-2:#545B54; --ink-3:#969E96;
+  --line:#E4E7E4; --line-2:#D8DDD8; --red:#E5484D;
+  --hdr-bg:rgba(255,255,255,.86);
+  --sh-1:0 1px 2px rgba(23,27,23,.05),0 3px 12px rgba(23,27,23,.05);
+  --r-l:18px;
+}
+html[data-theme="dark"]{
+  --bg:#101310; --paper:#191D19; --hover-wash:#1C2A1C;
+  --lime:#3DFF3D; --lime-deep:#2FE22F; --lime-ink:#052B05; --lime-line:#2A4A2A;
+  --ink:#E8ECE8; --ink-2:#A8B0A8; --ink-3:#6B756B;
+  --line:#262B26; --line-2:#313831;
+  --hdr-bg:rgba(20,24,20,.86);
+  --sh-1:0 1px 2px rgba(0,0,0,.3),0 3px 12px rgba(0,0,0,.25);
+}
+body{font-family:'Manrope',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;border:none;background:none;color:inherit;cursor:pointer}
+svg{display:block}
+.hdr{position:sticky;top:0;z-index:130;background:var(--hdr-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hdr::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent 0%,var(--lime) 18%,var(--lime) 82%,transparent 100%);opacity:.5}
+.hdr__in{max-width:1400px;margin:0 auto;padding:13px clamp(14px,3vw,26px);display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand__mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(140deg,#7DFF7D 0%,var(--lime) 42%,#00C400 100%);display:grid;place-items:center;box-shadow:0 3px 14px rgba(0,220,60,.4)}
+.brand__mark svg{width:22px;height:22px}
+.brand__name{font-size:21px;font-weight:800;letter-spacing:-.7px;background:linear-gradient(120deg,#00D400,#00FF40 55%,#00C800);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand__name small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.24em;color:var(--ink-3);-webkit-text-fill-color:var(--ink-3);margin-top:2px}
+.frame{max-width:880px;margin:0 auto;padding:50px 26px 80px}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink-3);margin-bottom:18px}
+.crumb a:hover{color:var(--lime-deep)}
+h1{font-size:34px;font-weight:800;letter-spacing:-.8px;margin-bottom:12px}
+.lead{font-size:16px;font-weight:600;color:var(--ink-2);line-height:1.65;margin-bottom:34px;max-width:640px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:34px}
+.g-card{
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r-l);
+  box-shadow:var(--sh-1);padding:22px;
+}
+.g-card .ico{
+  width:44px;height:44px;border-radius:12px;
+  background:var(--hover-wash);color:var(--lime-deep);
+  display:grid;place-items:center;margin-bottom:14px;
+}
+.g-card .ico svg{width:22px;height:22px}
+.g-card h3{font-size:15.5px;font-weight:800;margin-bottom:8px}
+.g-card p{font-size:13.5px;font-weight:500;color:var(--ink-2);line-height:1.65}
+.steps{counter-reset:step;margin-bottom:34px}
+.step{
+  position:relative;padding:0 0 26px 58px;
+}
+.step::before{
+  counter-increment:step;
+  content:counter(step);
+  position:absolute;left:0;top:0;
+  width:38px;height:38px;border-radius:12px;
+  background:linear-gradient(140deg,#5CFF5C,var(--lime) 50%,#00D400);
+  color:var(--lime-ink);font-size:16px;font-weight:800;
+  display:grid;place-items:center;
+  box-shadow:0 3px 12px rgba(0,220,60,.35);
+}
+.step:not(:last-child)::after{
+  content:'';position:absolute;left:18px;top:44px;bottom:4px;width:2px;
+  background:var(--line-2);border-radius:2px;
+}
+.step h3{font-size:15.5px;font-weight:800;margin-bottom:6px;padding-top:7px}
+.step p{font-size:13.5px;font-weight:500;color:var(--ink-2);line-height:1.65}
+.note{
+  background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--lime-deep);
+  border-radius:0 var(--r-l) var(--r-l) 0;
+  padding:18px 22px;margin-bottom:30px;
+}
+.note b{font-size:14px;font-weight:800;display:block;margin-bottom:6px}
+.note p{font-size:13.5px;font-weight:500;color:var(--ink-2);line-height:1.65}
+.back{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 24px;border-radius:13px;background:linear-gradient(140deg,#5CFF5C,var(--lime) 45%,#00D400);color:var(--lime-ink);font-size:14px;font-weight:800;box-shadow:0 4px 16px rgba(0,220,60,.38)}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr__in">
+    <a class="brand" href="index.html">
+      <span class="brand__mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#053B05" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 11.5h4M8 9.5v4"/>
+          <circle cx="15.2" cy="10.7" r=".9" fill="#053B05" stroke="none"/>
+          <circle cx="17.8" cy="12.7" r=".9" fill="#053B05" stroke="none"/>
+          <path d="M17.3 5.5H6.7a4 4 0 0 0-3.97 3.56c-.27 2.1-.45 4.3-.45 5.5 0 2.62 1.6 3.97 3.86 3.97 1.28 0 2.23-.56 3-1.32l.9-.9a2.6 2.6 0 0 1 3.9.02l.88.9c.78.76 1.72 1.3 3 1.3 2.26 0 3.86-1.35 3.86-3.97 0-1.2-.18-3.4-.45-5.5A4 4 0 0 0 17.3 5.5z"/>
+        </svg>
+      </span>
+      <span class="brand__name">GameStore<small>ЭКСКЛЮЗИВНЫЕ АККАУНТЫ</small></span>
+    </a>
+  </div>
+</header>
+
+<div class="frame">
+  <nav class="crumb"><a href="index.html">Главная</a> / <span>Гарантии</span></nav>
+  <h1>Гарантии и безопасность покупок</h1>
+  <p class="lead">Каждая покупка в GameStore защищена. Мы работаем на рынке игровых аккаунтов с 2024 года и дорожим репутацией — вот конкретные обязательства, а не общие слова.</p>
+
+  <div class="grid">
+    <div class="g-card">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5.5v5.2c0 5 3.4 9.4 8 10.8 4.6-1.4 8-5.8 8-10.8V5.5z"/><path d="m9 12 2 2 4-4.5"/></svg></span>
+      <h3>Гарантия 30 дней</h3>
+      <p>Если аккаунт перестал работать или данные не подошли в течение 30 дней после покупки — заменим на аналогичный или вернём деньги.</p>
+    </div>
+    <div class="g-card">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2 4.5 13.5H11l-1 8.5L18.5 10H12z"/></svg></span>
+      <h3>Мгновенная выдача</h3>
+      <p>Данные приходят автоматически сразу после оплаты — в браузере и на email. Никакого ожидания «когда-нибудь».</p>
+    </div>
+    <div class="g-card">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7c2-1.5 4.5-2 7-2s5 .5 7 2M5 17c2 1.5 4.5 2 7 2s5-.5 7-2M4 12h16"/></svg></span>
+      <h3>Проверка перед выдачей</h3>
+      <p>Каждый аккаунт тестируется перед продажей: вход, валидность игр, целостность инвентаря. Скринов состояния присылаем по запросу.</p>
+    </div>
+    <div class="g-card">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 1 1-4.6-7.6L21 4l-1 4.5"/><path d="M9 12h.01M12.5 12h.01M16 12h.01"/></svg></span>
+      <h3>Поддержка 24/7</h3>
+      <p>Отвечаем в чате на сайте и в Telegram. Среднее время первого ответа — 15 минут, в любое время суток.</p>
+    </div>
+    <div class="g-card">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 9h6M7 12.5h3"/></svg></span>
+      <h3>Полная смена данных</h3>
+      <p>На всех аккаунтах, где это технически возможно, вы меняете почту и пароль на свои — покупка окончательно закрепляется за вами.</p>
+    </div>
+    <div class="g-card">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></span>
+      <h3>Возврат без вопросов</h3>
+      <p>Передумали до выдачи данных — возвращаем 100% без объяснения причин в течение 24 часов после оплаты.</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>⚠️ Важно про безопасность самой сделки</b>
+    <p>Мы никогда не запрашиваем пароль от вашего Steam, коды Steam Guard или данные кошелька в личных сообщениях. Все оплаты идут только через официальную форму оплаты на сайте. Если вам пишет «поддержка» с просьбой что-то «подтвердить» — это мошенники, настоящая поддержка пишется только из чата сайта.</p>
+  </div>
+
+  <h1 style="font-size:26px;margin-bottom:22px">Как проходит покупка</h1>
+  <div class="steps">
+    <div class="step">
+      <h3>Выбираете товар</h3>
+      <p>В каталоге — по фильтрам и сортировке. В карточке: состав, характеристики, цена.</p>
+    </div>
+    <div class="step">
+      <h3>Оплачиваете удобным способом</h3>
+      <p>Криптовалюта (BTC, USDT, TON) или банковская карта. Оплата проходит через защищённый шлюз.</p>
+    </div>
+    <div class="step">
+      <h3>Получаете данные мгновенно</h3>
+      <p>Логин/пароль и инструкция приходят на экран и на email сразу после подтверждения оплаты.</p>
+    </div>
+    <div class="step">
+      <h3>Закрепляете аккаунт за собой</h3>
+      <p>Меняете почту и пароль по нашей инструкции. Если что-то не получается — поддержка проведёт за руку.</p>
+    </div>
+  </div>
+
+  <a class="back" href="index.html">← На главную</a>
+</div>
+</body>
+</html>

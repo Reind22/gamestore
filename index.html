@@ -562,6 +562,76 @@ img,svg{display:block}
   .hero__cap p{display:none}
   .hero__dots{bottom:12px;right:14px}
 }
+
+
+
+/* Бегущая строка отзывов */
+.rv-marquee{
+  overflow:hidden;position:relative;
+  margin-top:40px;
+  mask:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  -webkit-mask:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.rv-track{
+  display:flex;gap:14px;width:max-content;
+  animation:rv-scroll 46s linear infinite;
+}
+.rv-marquee:hover .rv-track{animation-play-state:paused}
+@keyframes rv-scroll{to{transform:translateX(-50%)}}
+.rv-card{
+  width:290px;flex-shrink:0;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r-m);
+  box-shadow:var(--sh-1);padding:16px;
+}
+.rv-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.rv-av{
+  width:34px;height:34px;border-radius:50%;flex-shrink:0;
+  display:grid;place-items:center;font-size:15px;font-weight:800;color:#fff;
+}
+.rv-name{font-size:13px;font-weight:800}
+.rv-stars{font-size:11px;color:var(--gold);letter-spacing:1px}
+.rv-text{font-size:12.5px;font-weight:600;color:var(--ink-2);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rv-item{font-size:10.5px;font-weight:700;color:var(--ink-3);margin-top:7px}
+.rv-title{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:44px;margin-bottom:16px;
+}
+.rv-title h2{font-size:21px;font-weight:800;letter-spacing:-.4px}
+.rv-title a{
+  display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 16px;
+  border-radius:11px;border:1.5px solid var(--line-2);background:var(--paper);
+  font-size:13px;font-weight:800;color:var(--lime-deep);transition:.18s;
+}
+.rv-title a:hover{border-color:var(--lime-deep);background:var(--hover-wash)}
+
+/* Ховер-галерея на карточке */
+.hg{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column}
+.hg__row{position:absolute;inset:auto 0 0 0;display:flex;gap:4px;padding:8px 10px;opacity:0;transition:opacity .22s}
+.item:hover .hg__row{opacity:1}
+.hg__fr{
+  flex:1;aspect-ratio:1/1;border-radius:8px;
+  background:rgba(255,255,255,.9);
+  display:grid;place-items:center;font-size:15px;
+  box-shadow:0 1px 6px rgba(0,0,0,.12);
+}
+html[data-theme="dark"] .hg__fr{background:rgba(30,35,30,.9)}
+.item:hover .item__glyph{opacity:0}
+/* ── Масштабо-устойчивость (v2.2) ── */
+body{ overflow-x:hidden }
+.hdr__in{ padding-inline:clamp(14px, 3vw, 26px); flex-wrap:nowrap; min-width:0 }
+.frame{ padding-inline:clamp(14px, 3vw, 26px) }
+.find{ min-width:120px; flex:1 1 160px }
+.find input{ padding-right:18px }
+.btn-go{ white-space:nowrap; flex-shrink:0 }
+.brand{ min-width:0 }
+.brand__name small{ white-space:nowrap }
+.acts{ min-width:0 }
+.row, .sim-row{
+  grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)) !important;
+}
+@media (max-width:620px){
+  .row, .sim-row{ grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)) !important }
+}
 </style>
 </head>
 <body>
@@ -668,6 +738,13 @@ img,svg{display:block}
 
   <!-- Полки наполняет JS из GAMES -->
   <div id="shelves"></div>
+
+  <!-- Отзывы: бегущая строка -->
+  <div class="rv-title">
+    <h2 data-i18n="rvTtl">Отзывы покупателей</h2>
+    <a href="reviews.html"><span data-i18n="rvAll">Все отзывы</span> <span>→</span></a>
+  </div>
+  <div class="rv-marquee"><div class="rv-track" id="rvTrack"></div></div>
 
 </div>
 
@@ -790,7 +867,9 @@ img,svg{display:block}
                 : '';
     return `
     <article class="item" data-game-id="${g.id}" onclick="location.href='product.html?id=${g.id}'">
-      <div class="item__pic">${art}<span class="item__glyph">${g.emoji}</span>${badge}<button class="star" aria-label="В желаемое" onclick="event.stopPropagation()">☆</button><span class="item__plat">${g.platform}</span></div>
+      <div class="item__pic">${art}<span class="item__glyph">${g.emoji}</span>${badge}<button class="star" aria-label="В желаемое" onclick="event.stopPropagation()">☆</button><span class="item__plat">${g.platform}</span>
+        <div class="hg"><div class="hg__row">${(g.media||[]).slice(0,4).map(m => `<span class="hg__fr">${m.emoji}</span>`).join('')}</div></div>
+      </div>
       <div class="item__info">
         <h3 class="item__name">${g.title[lang()]}</h3>
         <div class="item__sub">${g.short[lang()]}</div>
@@ -839,6 +918,35 @@ img,svg{display:block}
       .nav__m{padding:13px 14px;border-radius:11px;font-size:15px;font-weight:800;color:var(--ink-2)}
       .nav__m:hover,.nav__m.on{background:var(--hover-wash);color:var(--lime-deep)}
     </style>`;
+
+  /* ═══ Отзывы: бегущая строка ═══ */
+  const REVIEWS = [
+    { n:'Дмитрий', a:'#2E7D32', g:'🧑‍💻', s:5, t:{ ru:'Взял акк с 50 играми — всё как в описании, почта сменилась без проблем. Поддержка ответила за 10 минут.', en:'Bought 50-game account — exactly as described, email changed easily. Support replied in 10 minutes.' }, i:'Steam + 50 игр' },
+    { n:'Алексей', a:'#C62828', g:'🎯', s:5, t:{ ru:'CS2 Prime со скинами за такие деньги — думал развод, оказалось нет. AK Redline на месте.', en:'CS2 Prime with skins for this price — thought it was a scam, it was not. AK Redline included.' }, i:'CS2 Prime' },
+    { n:'Марат', a:'#1565C0', g:'⚔️', s:5, t:{ ru:'Dota Immortal 6200 MMR, арканы все на месте. Гарантия 30 дней — это решает.', en:'Dota Immortal 6,200 MMR, all arcanas in place. 30-day warranty — that seals the deal.' }, i:'Dota 2 Immortal' },
+    { n:'Игорь', a:'#6A1B9A', g:'🚗', s:4, t:{ ru:'GTA V с 10 млн на балансе. Выдача моментальная, покупал ночью в 3 часа.', en:'GTA V with $10M balance. Instant delivery, bought at 3 AM.' }, i:'GTA V Premium' },
+    { n:'Сергей', a:'#00695C', g:'🏰', s:5, t:{ ru:'Minecraft для сына купил. Ник сменили, всё чисто. Второй раз здесь.', en:'Minecraft for my son. Nickname changed, all clean. Second purchase here.' }, i:'Minecraft' },
+    { n:'Влад', a:'#E65100', g:'⛏️', s:5, t:{ ru:'Rust 4200 часов — аккаунт ровно как на скринах. Полный доступ, всё сменил.', en:'Rust 4,200 hours — account exactly as on screenshots. Full access, changed everything.' }, i:'Rust + DLC' },
+    { n:'Никита', a:'#283593', g:'🏆', s:5, t:{ ru:'Fortnite с Renegade Raider — искал полгода. Цена ниже, чем у конкурентов.', en:'Fortnite with Renegade Raider — searched for months. Cheaper than competitors.' }, i:'Epic + Fortnite' },
+    { n:'Олег', a:'#37474F', g:'🌐', s:4, t:{ ru:'Cyberpunk + Phantom Liberty. DLC активирован, играет сын. Оплата USDT прошла за минуту.', en:'Cyberpunk + Phantom Liberty. DLC active, my son plays. USDT payment took a minute.' }, i:'Cyberpunk 2077' },
+  ];
+  function rvCard(r){
+    return `<div class="rv-card">
+      <div class="rv-head">
+        <span class="rv-av" style="background:${r.a}">${r.g}</span>
+        <div>
+          <div class="rv-name">${r.n}</div>
+          <div class="rv-stars">${'★'.repeat(r.s)}${'☆'.repeat(5 - r.s)}</div>
+        </div>
+      </div>
+      <div class="rv-text">«${r.t[lang()]}»</div>
+      <div class="rv-item">Покупка: ${r.i}</div>
+    </div>`;
+  }
+  const rvEl = $('#rvTrack');
+  if (rvEl){
+    rvEl.innerHTML = [...REVIEWS, ...REVIEWS].map(rvCard).join('');
+  }
 })();
 </script>
 </body>
