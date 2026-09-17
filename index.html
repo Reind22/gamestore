@@ -603,16 +603,9 @@ img,svg{display:block}
         </button>
       </div>
 
-      <div class="seg seg--lang" role="group" aria-label="Язык">
-        <button class="seg__btn on" data-set-lang="ru">RU</button>
-        <button class="seg__btn" data-set-lang="en">EN</button>
-      </div>
+<div class="dd" data-dd="lang"></div>
 
-      <div class="seg" role="group" aria-label="Валюта">
-        <button class="seg__btn on" data-set-cur="USD">$</button>
-        <button class="seg__btn" data-set-cur="RUB">₽</button>
-        <button class="seg__btn" data-set-cur="EUR">€</button>
-      </div>
+<div class="dd" data-dd="cur"></div>
 
       <button class="knob" id="heartBtn" aria-label="Желаемое">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.5-1.5 2-3.1 2-4.6A4.4 4.4 0 0 0 16.6 5c-1.7 0-3 .9-4.6 2.6C10.4 5.9 9.1 5 7.4 5A4.4 4.4 0 0 0 3 9.4c0 1.5.5 3.1 2 4.6l7 7z"/></svg>
@@ -620,7 +613,7 @@ img,svg{display:block}
       </button>
       <button class="knob" aria-label="Корзина">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9.3" cy="19.8" r="1.5"/><circle cx="17" cy="19.8" r="1.5"/><path d="M3.2 4h2.4l2.2 11.1a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21.3 8H6.1"/></svg>
-        <span class="pip" data-zero>0</span>
+        <span class="pip" id="cartPip" data-zero>0</span>
       </button>
       <button class="btn-go" data-i18n="login">Войти</button>
       <button class="btn-burger" id="burger" aria-label="Меню" aria-expanded="false">
@@ -706,6 +699,15 @@ img,svg{display:block}
   'use strict';
   const { $, $$, lang, L, fmt, wishBind, toast } = GS;
 
+  /* Плюс → корзина */
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-cart-add]');
+    if (!btn) return;
+    e.preventDefault(); e.stopPropagation();
+    GS.cartAdd(parseInt(btn.dataset.cartAdd));
+    toast(lang() === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
+  }, true);
+
   /* ═══ БАННЕРНАЯ КАРУСЕЛЬ ═══ */
   const track = $('#heroTrack');
   const dots  = $('#heroDots');
@@ -787,7 +789,7 @@ img,svg{display:block}
                 : g.oldPrice ? `<span class="tag tag--cut">−${Math.round((1 - g.price / g.oldPrice) * 100)}%</span>`
                 : '';
     return `
-    <article class="item" onclick="location.href='product.html?id=${g.id}'">
+    <article class="item" data-game-id="${g.id}" onclick="location.href='product.html?id=${g.id}'">
       <div class="item__pic">${art}<span class="item__glyph">${g.emoji}</span>${badge}<button class="star" aria-label="В желаемое" onclick="event.stopPropagation()">☆</button><span class="item__plat">${g.platform}</span></div>
       <div class="item__info">
         <h3 class="item__name">${g.title[lang()]}</h3>
@@ -797,7 +799,7 @@ img,svg{display:block}
             <span class="price__now money" data-usd="${g.price}">${fmt(g.price)}</span>
             ${g.oldPrice ? `<span class="price__was"><b>−${Math.round((1 - g.price / g.oldPrice) * 100)}%</b> <span class="money" data-usd="${g.oldPrice}">${fmt(g.oldPrice)}</span></span>` : ''}
           </div>
-          <button class="tocart" aria-label="Добавить в корзину" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button class="tocart" aria-label="Добавить в корзину" data-cart-add="${g.id}" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
         </div>
       </div>
     </article>`;

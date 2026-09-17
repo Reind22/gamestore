@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Избранное — GameStore</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
+
+:root{
+  --bg:#F0F0F0; --paper:#FFFFFF; --paper-2:#FAFBFA; --hover-wash:#F0F8F0;
+  --lime:#00FF00; --lime-deep:#0ECC0E; --lime-ink:#053B05; --lime-line:#C4ECC4;
+  --ink:#171B17; --ink-2:#545B54; --ink-3:#969E96;
+  --line:#E4E7E4; --line-2:#D8DDD8; --red:#E5484D; --red-bg:#FDEDEE; --gold:#FFD84D;
+  --hdr-bg:rgba(255,255,255,.86); --pic-a:#ECF7EC; --pic-b:#D8EFD8;
+  --sh-1:0 1px 2px rgba(23,27,23,.05), 0 3px 12px rgba(23,27,23,.05);
+  --sh-2:0 12px 32px rgba(23,27,23,.13);
+  --r-m:14px; --r-l:18px;
+  --ease:cubic-bezier(.22,.75,.28,1);
+}
+html[data-theme="dark"]{
+  --bg:#101310; --paper:#191D19; --paper-2:#1E231E; --hover-wash:#1C2A1C;
+  --lime:#3DFF3D; --lime-deep:#2FE22F; --lime-ink:#052B05; --lime-line:#2A4A2A;
+  --ink:#E8ECE8; --ink-2:#A8B0A8; --ink-3:#6B756B;
+  --line:#262B26; --line-2:#313831; --red:#FF6369; --red-bg:#3A1E20; --gold:#FFD84D;
+  --hdr-bg:rgba(20,24,20,.86); --pic-a:#1B271B; --pic-b:#223022;
+  --sh-1:0 1px 2px rgba(0,0,0,.3), 0 3px 12px rgba(0,0,0,.25);
+  --sh-2:0 12px 32px rgba(0,0,0,.5);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Manrope',system-ui,-apple-system,sans-serif;
+  background:radial-gradient(1100px 500px at 85% -8%, rgba(0,255,0,.045), transparent 62%), var(--bg);
+  color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;
+  transition:background .3s, color .3s;
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit;border:none;background:none;color:inherit;cursor:pointer}
+img,svg{display:block}
+:focus-visible{outline:2.5px solid var(--lime-deep);outline-offset:2px;border-radius:6px}
+.money{font-family:'JetBrains Mono',monospace;font-weight:600;letter-spacing:-.4px}
+
+.hdr{position:sticky;top:0;z-index:130;background:var(--hdr-bg);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hdr::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:linear-gradient(90deg,transparent 0%,var(--lime) 18%,var(--lime) 82%,transparent 100%);opacity:.5}
+.hdr__in{max-width:1400px;margin:0 auto;padding:13px 26px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:11px;flex-shrink:0}
+.brand__mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(140deg,#7DFF7D 0%,var(--lime) 42%,#00C400 100%);display:grid;place-items:center;box-shadow:0 3px 14px rgba(0,220,60,.4)}
+.brand__mark svg{width:22px;height:22px}
+.brand__name{font-size:21px;font-weight:800;letter-spacing:-.7px;background:linear-gradient(120deg,#00D400,#00FF40 55%,#00C800);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.brand__name small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.24em;color:var(--ink-3);-webkit-text-fill-color:var(--ink-3);margin-top:2px}
+.nav{display:flex;gap:2px;margin-left:6px}
+.nav a{padding:10px 15px;border-radius:11px;font-size:14.5px;font-weight:700;color:var(--ink-2);transition:.16s}
+.nav a:hover{color:var(--ink);background:var(--hover-wash)}
+.nav a.on{color:var(--lime-deep)}
+.find{flex:1;max-width:430px;margin-left:auto;position:relative}
+.find input{width:100%;height:46px;padding:0 18px;border:1.5px solid var(--line-2);border-radius:13px;background:var(--paper);font-size:14px}
+.find input:focus{outline:none;border-color:var(--lime-deep)}
+.acts{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.knob{position:relative;width:44px;height:44px;border-radius:13px;border:1.5px solid var(--line-2);background:var(--paper);display:grid;place-items:center;color:var(--ink-2);transition:.18s}
+.knob svg{width:19px;height:19px}
+.knob:hover{border-color:var(--lime-deep);color:var(--lime-deep);background:var(--hover-wash)}
+.knob .pip{position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--lime-deep);color:#fff;border:2.5px solid var(--paper);font-size:10.5px;font-weight:800;display:grid;place-items:center}
+.knob .pip:empty,.knob .pip[data-zero]{display:none}
+.btn-go{height:44px;padding:0 22px;border-radius:13px;background:linear-gradient(140deg,#5CFF5C,var(--lime) 45%,#00D400);color:var(--lime-ink);font-size:14.5px;font-weight:800;box-shadow:0 4px 16px rgba(0,220,60,.38)}
+.btn-burger{display:none}
+.dd{position:relative}
+.dd__btn{height:44px;padding:0 13px;border-radius:13px;border:1.5px solid var(--line-2);background:var(--paper);display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--ink-2);transition:.18s}
+.dd__btn:hover{border-color:var(--lime-deep);color:var(--ink)}
+.dd__btn .cur-sym{font-size:15px;color:var(--lime-deep)}
+.dd__btn .car{font-size:9px;color:var(--ink-3);transition:transform .22s}
+.dd.open .dd__btn .car{transform:rotate(-180deg)}
+.dd__pop{position:absolute;top:calc(100% + 8px);right:0;z-index:120;min-width:150px;padding:6px;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-2);opacity:0;pointer-events:none;transform:translateY(-6px);transition:.18s}
+.dd.open .dd__pop{opacity:1;pointer-events:auto;transform:none}
+.dd__it{width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9.5px 12px;border-radius:9px;font-size:13px;font-weight:700;color:var(--ink-2);transition:.12s}
+.dd__it:hover{background:var(--hover-wash);color:var(--ink)}
+.dd__it.on{color:var(--lime-deep);font-weight:800}
+.dd__it .tick{opacity:0;color:var(--lime-deep)}
+.dd__it.on .tick{opacity:1}
+.seg{display:flex;align-items:center;background:var(--paper);border:1.5px solid var(--line-2);border-radius:13px;padding:3px;gap:2px;height:44px}
+.seg__btn{min-width:44px;width:44px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--ink-3);transition:.16s}
+.seg__btn svg{width:17px;height:17px}
+.seg__btn.on{background:var(--hover-wash);color:var(--lime-deep);box-shadow:inset 0 0 0 1.5px var(--lime-line)}
+
+.veil{position:fixed;inset:0;z-index:190;background:rgba(12,16,12,.5);opacity:0;pointer-events:none;transition:.26s}
+.veil.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;top:0;right:0;z-index:200;width:min(100vw,360px);height:100dvh;background:var(--paper);transform:translateX(105%);transition:transform .34s var(--ease);display:flex;flex-direction:column;visibility:hidden}
+.sheet.open{transform:none;visibility:visible}
+.sheet__top{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--line)}
+.sheet__ttl{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2)}
+.sheet__x{width:40px;height:40px;border-radius:11px;border:1.5px solid var(--line-2);background:var(--paper-2);display:grid;place-items:center}
+.sheet__body{flex:1;overflow-y:auto;padding:16px}
+.sheet__prefs{display:flex;flex-direction:column;gap:12px;padding:4px 4px 14px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.sheet__prefs .seg{width:100%;height:48px}
+.sheet__prefs .seg__btn{flex:1}
+
+.frame{max-width:1400px;margin:0 auto;padding:26px 26px 64px}
+.page-ttl{font-size:28px;font-weight:800;letter-spacing:-.6px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.page-ttl .emo{font-size:26px}
+.page-sub{font-size:14px;font-weight:600;color:var(--ink-3);margin-bottom:26px}
+
+.wl-list{display:flex;flex-direction:column;gap:13px}
+.wl-item{
+  display:grid;grid-template-columns:110px minmax(0,1fr) auto;
+  gap:18px;align-items:center;
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--r-l);
+  box-shadow:var(--sh-1);padding:14px;
+  cursor:pointer;transition:.2s var(--ease);
+}
+.wl-item:hover{border-color:var(--lime-line);box-shadow:0 10px 28px rgba(0,170,50,.12);transform:translateY(-2px)}
+.wl-item.removing{opacity:0;transform:translateX(-40px);transition:.3s}
+.wl-pic{
+  position:relative;width:110px;aspect-ratio:16/10;border-radius:12px;overflow:hidden;
+  background:linear-gradient(135deg,var(--pic-a),var(--pic-b));
+  display:grid;place-items:center;
+}
+.wl-pic .capsule{width:38%;aspect-ratio:600/900;object-fit:cover;border-radius:0 8px 8px 0;transform:translateX(-8%)}
+.wl-pic .glyph{font-size:36px}
+.wl-info{min-width:0}
+.wl-name{font-size:15.5px;font-weight:800;margin-bottom:5px}
+.wl-item:hover .wl-name{color:var(--lime-deep)}
+.wl-sub{font-size:12.5px;font-weight:600;color:var(--ink-3);margin-bottom:7px}
+.wl-tags{display:flex;gap:6px;flex-wrap:wrap}
+.wl-tag{font-size:10.5px;font-weight:800;padding:3.5px 9px;border-radius:7px;background:var(--hover-wash);color:var(--lime-deep);border:1px solid var(--lime-line)}
+.wl-actions{display:flex;align-items:center;gap:11px}
+.wl-price{text-align:right}
+.wl-price .now{font-size:19px;color:var(--lime-deep);display:block}
+.wl-price .old{font-size:12px;color:var(--ink-3);text-decoration:line-through}
+.btn-tocart{
+  height:42px;padding:0 18px;border-radius:12px;
+  background:var(--hover-wash);color:var(--lime-deep);
+  font-size:13px;font-weight:800;
+  display:flex;align-items:center;gap:8px;
+  transition:.16s var(--ease);
+  white-space:nowrap;
+}
+.btn-tocart:hover{background:var(--lime);color:var(--lime-ink);transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,220,60,.35)}
+.btn-tocart svg{width:15px;height:15px}
+.wl-star{
+  position:absolute;top:8px;right:8px;z-index:2;
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(255,255,255,.95);
+  display:grid;place-items:center;font-size:15px;color:var(--gold);
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+
+.empty{
+  text-align:center;padding:90px 20px;color:var(--ink-3);
+}
+.empty .big{font-size:64px;margin-bottom:16px;opacity:.6}
+.empty h3{font-size:21px;font-weight:800;color:var(--ink-2);margin-bottom:8px}
+.empty p{font-size:14px;font-weight:600;margin-bottom:22px}
+
+.ftr{border-top:1px solid var(--line);background:var(--paper);margin-top:10px}
+.ftr__in{max-width:1400px;margin:0 auto;padding:34px 26px;display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap}
+.ftr__brand{display:flex;align-items:center;gap:9px}
+.ftr__brand .brand__mark{width:30px;height:30px;border-radius:9px}
+.ftr__brand .brand__mark svg{width:16px;height:16px}
+.ftr__brand b{font-size:15px;font-weight:800;color:var(--lime-deep)}
+.ftr__note{font-size:12.5px;color:var(--ink-3);font-weight:600}
+.ftr__nav{display:flex;gap:22px;flex-wrap:wrap}
+.ftr__nav a{font-size:13px;font-weight:700;color:var(--ink-2)}
+.ftr__nav a:hover{color:var(--lime-deep)}
+.toast{position:fixed;left:50%;bottom:28px;z-index:400;translate:-50% 16px;display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--bg);padding:13px 20px;border-radius:14px;font-size:13.5px;font-weight:700;box-shadow:var(--sh-2);opacity:0;pointer-events:none;transition:.28s}
+.toast.show{opacity:1;translate:-50% 0}
+.toast .s{color:var(--gold);font-size:15px}
+
+@media (max-width:840px){
+  .find{display:none}
+  .btn-go{display:none}
+  .btn-burger{display:grid;place-items:center;width:44px;height:44px;border-radius:13px;border:1.5px solid var(--line-2);background:var(--paper);color:var(--ink-2)}
+  .wl-item{grid-template-columns:86px minmax(0,1fr);gap:13px}
+  .wl-actions{grid-column:1/-1;justify-content:space-between}
+  .wl-pic{width:86px}
+}
+@media (max-width:620px){
+  .frame{padding:18px 14px 52px}
+  .hdr__in{padding:11px 14px}
+  .brand__name{font-size:18px}
+  .brand__mark{width:35px;height:35px}
+  .seg,.dd{display:none}
+  .page-ttl{font-size:23px}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr__in">
+    <a class="brand" href="index.html">
+      <span class="brand__mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#053B05" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 11.5h4M8 9.5v4"/>
+          <circle cx="15.2" cy="10.7" r=".9" fill="#053B05" stroke="none"/>
+          <circle cx="17.8" cy="12.7" r=".9" fill="#053B05" stroke="none"/>
+          <path d="M17.3 5.5H6.7a4 4 0 0 0-3.97 3.56c-.27 2.1-.45 4.3-.45 5.5 0 2.62 1.6 3.97 3.86 3.97 1.28 0 2.23-.56 3-1.32l.9-.9a2.6 2.6 0 0 1 3.9.02l.88.9c.78.76 1.72 1.3 3 1.3 2.26 0 3.86-1.35 3.86-3.97 0-1.2-.18-3.4-.45-5.5A4 4 0 0 0 17.3 5.5z"/>
+        </svg>
+      </span>
+      <span class="brand__name">GameStore<small data-i18n="brandSub">ЭКСКЛЮЗИВНЫЕ АККАУНТЫ</small></span>
+    </a>
+
+    <nav class="nav" aria-label="Разделы">
+      <a href="index.html" data-i18n="navHome">Главная</a>
+      <a href="catalog.html" data-i18n="navCatalog">Каталог</a>
+      <a class="on" href="wishlist.html" data-i18n="navWish">Избранное</a>
+      <a href="#" data-i18n="navHelp">Помощь</a>
+    </nav>
+
+    <div class="find">
+      <input type="search" placeholder="Найти…" data-i18n-ph="searchPh" aria-label="Поиск">
+    </div>
+
+    <div class="acts">
+      <div class="seg seg--theme" role="group" aria-label="Тема">
+        <button class="seg__btn on" data-set-theme="light" aria-label="Светлая">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/></svg>
+        </button>
+        <button class="seg__btn" data-set-theme="dark" aria-label="Тёмная">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 14.2A8.6 8.6 0 0 1 9.8 3.4a8.6 8.6 0 1 0 10.8 10.8z"/></svg>
+        </button>
+      </div>
+      <div class="dd" data-dd="lang"></div>
+      <div class="dd" data-dd="cur"></div>
+      <button class="knob" aria-label="Желаемое" onclick="location.href='wishlist.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.5-1.5 2-3.1 2-4.6A4.4 4.4 0 0 0 16.6 5c-1.7 0-3 .9-4.6 2.6C10.4 5.9 9.1 5 7.4 5A4.4 4.4 0 0 0 3 9.4c0 1.5.5 3.1 2 4.6l7 7z"/></svg>
+        <span class="pip" id="heartPip" data-zero></span>
+      </button>
+      <button class="knob" aria-label="Корзина" onclick="location.href='cart.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9.3" cy="19.8" r="1.5"/><circle cx="17" cy="19.8" r="1.5"/><path d="M3.2 4h2.4l2.2 11.1a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21.3 8H6.1"/></svg>
+        <span class="pip" id="cartPip" data-zero>0</span>
+      </button>
+      <button class="btn-go" data-i18n="login">Войти</button>
+      <button class="btn-burger" id="burger" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="veil" id="veil"></div>
+<aside class="sheet" id="sheet" aria-hidden="true">
+  <div class="sheet__top">
+    <span class="sheet__ttl" data-i18n="menu">Меню</span>
+    <button class="sheet__x" id="sheetX">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5.5 5.5l13 13M18.5 5.5l-13 13"/></svg>
+    </button>
+  </div>
+  <div class="sheet__body">
+    <div class="sheet__prefs">
+      <div class="seg" role="group" aria-label="Язык">
+        <button class="seg__btn on" data-set-lang="ru">RU — Русский</button>
+        <button class="seg__btn" data-set-lang="en">EN — English</button>
+      </div>
+      <div class="seg" role="group" aria-label="Тема">
+        <button class="seg__btn on" data-set-theme="light" data-i18n="themeLight">☀️ Светлая</button>
+        <button class="seg__btn" data-set-theme="dark" data-i18n="themeDark">🌙 Тёмная</button>
+      </div>
+      <div class="seg" role="group" aria-label="Валюта">
+        <button class="seg__btn on" data-set-cur="USD">USD $</button>
+        <button class="seg__btn" data-set-cur="RUB">RUB ₽</button>
+        <button class="seg__btn" data-set-cur="EUR">EUR €</button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="frame">
+  <h1 class="page-ttl"><span class="emo">⭐</span><span data-i18n="wishTtl">Избранное</span></h1>
+  <p class="page-sub" id="wlSub"></p>
+  <div class="wl-list" id="wlList"></div>
+  <div class="empty" id="wlEmpty" style="display:none">
+    <div class="big">☆</div>
+    <h3 data-i18n="wishEmpty">В избранном пусто</h3>
+    <p data-i18n="wishEmptySub">Нажимайте на звёздочку у товаров, чтобы сохранить их здесь</p>
+    <a class="btn-go" href="catalog.html" style="display:inline-flex;align-items:center;padding:0 26px;text-decoration:none" data-i18n="navCatalog">Каталог</a>
+  </div>
+</div>
+
+<footer class="ftr">
+  <div class="ftr__in">
+    <div>
+      <div class="ftr__brand">
+        <span class="brand__mark"><svg viewBox="0 0 24 24" fill="none" stroke="#053B05" stroke-width="2.1" stroke-linecap="round"><path d="M6 11.5h4M8 9.5v4"/><path d="M17.3 5.5H6.7a4 4 0 0 0-3.97 3.56c-.27 2.1-.45 4.3-.45 5.5 0 2.62 1.6 3.97 3.86 3.97 1.28 0 2.23-.56 3-1.32l.9-.9a2.6 2.6 0 0 1 3.9.02l.88.9c.78.76 1.72 1.3 3 1.3 2.26 0 3.86-1.35 3.86-3.97 0-1.2-.18-3.4-.45-5.5A4 4 0 0 0 17.3 5.5z"/></svg></span>
+        <b>GameStore</b>
+      </div>
+      <p class="ftr__note" style="margin-top:8px">© 2026 GameStore.<br><span data-i18n="curNote">Все цены в USD.</span></p>
+    </div>
+    <nav class="ftr__nav">
+      <a href="#" data-i18n="ftAbout">О магазине</a>
+      <a href="#" data-i18n="ftWarranty">Гарантии</a>
+      <a href="#" data-i18n="ftPay">Оплата</a>
+      <a href="#" data-i18n="ftSupport">Поддержка</a>
+    </nav>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status"><span class="s">★</span><span id="toastMsg"></span></div>
+
+<script src="gs_data.js"></script>
+<script src="gs_shared.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { $, $$, lang, L, fmt, toast, state } = GS;
+
+  function render(){
+    const list = $('#wlList');
+    const items = state.wish.map(id => GAMES.find(g => g.id === id)).filter(Boolean);
+
+    $('#wlSub').textContent = items.length
+      ? (lang() === 'ru' ? `${items.length} ${items.length === 1 ? 'товар' : items.length < 5 ? 'товара' : 'товаров'} в избранном` : `${items.length} item${items.length === 1 ? '' : 's'} saved`)
+      : '';
+    $('#wlEmpty').style.display = items.length ? 'none' : 'block';
+    list.style.display = items.length ? 'flex' : 'none';
+
+    list.innerHTML = items.map(g => {
+      const artKey = ART_BY_ID[g.id];
+      const art = artKey
+        ? `<img class="capsule" src="${steamCapsule(STEAM_ART[artKey])}" alt="" onerror="this.remove()">`
+        : `<span class="glyph">${g.emoji}</span>`;
+      return `
+      <article class="wl-item" data-game-id="${g.id}" onclick="location.href='product.html?id=${g.id}'">
+        <div class="wl-pic">${art}<button class="wl-star" data-wish-del="${g.id}" onclick="event.stopPropagation()">★</button></div>
+        <div class="wl-info">
+          <div class="wl-name">${g.title[lang()]}</div>
+          <div class="wl-sub">${g.short[lang()]}</div>
+          <div class="wl-tags">
+            <span class="wl-tag">${g.platform}</span>
+            ${g.genres.slice(0,2).map(x => `<span class="wl-tag">${GENRES[x][lang()]}</span>`).join('')}
+          </div>
+        </div>
+        <div class="wl-actions">
+          <div class="wl-price">
+            <span class="now money" data-usd="${g.price}">${fmt(g.price)}</span>
+            ${g.oldPrice ? `<span class="old money" data-usd="${g.oldPrice}">${fmt(g.oldPrice)}</span>` : ''}
+          </div>
+          <button class="btn-tocart" data-cart-add="${g.id}" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9.3" cy="19.8" r="1.5"/><circle cx="17" cy="19.8" r="1.5"/><path d="M3.2 4h2.4l2.2 11.1a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21.3 8H6.1"/></svg>
+            ${L('toCart') || 'В корзину'}
+          </button>
+        </div>
+      </article>`;
+    }).join('');
+
+    // Формат цен
+    $$('[data-usd]').forEach(el => { el.textContent = fmt(parseFloat(el.dataset.usd)); });
+
+    // Удаление из избранного
+    list.querySelectorAll('[data-wish-del]').forEach(b => b.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = parseInt(b.dataset.wishDel);
+      const card = b.closest('.wl-item');
+      card.classList.add('removing');
+      setTimeout(() => {
+        GS.wishToggle(id);
+        render();
+      }, 280);
+    }));
+
+    // Плюс → корзина
+    list.querySelectorAll('[data-cart-add]').forEach(b => b.addEventListener('click', e => {
+      e.stopPropagation();
+      GS.cartAdd(parseInt(b.dataset.cartAdd));
+      toast(lang() === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
+    }));
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

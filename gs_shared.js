@@ -16,6 +16,7 @@ const GS = (() => {
     lang:  localStorage.getItem('gs-lang')  || 'ru',
     cur:   localStorage.getItem('gs-cur')   || 'USD',
     wish:  JSON.parse(localStorage.getItem('gs-wish') || '[]'),
+    cart:  JSON.parse(localStorage.getItem('gs-cart') || '[]'),
   };
 
   const $  = (s, r=document) => r.querySelector(s);
@@ -42,6 +43,8 @@ const GS = (() => {
   function applyCur(){
     $$('[data-usd]').forEach(el => { el.textContent = money(parseFloat(el.dataset.usd)); });
     $$('[data-set-cur]').forEach(b => b.classList.toggle('on', b.dataset.setCur === state.cur));
+    $$('.dd[data-dd="cur"] .dd-label').forEach(l => { l.textContent = state.cur; });
+    $$('.dd[data-dd="cur"] .cur-sym').forEach(l => { l.textContent = SYM[state.cur]; });
   }
 
   /* ── Язык ── */
@@ -65,6 +68,13 @@ const GS = (() => {
     showResults:'Показать результаты', ftAbout:'О магазине', ftWarranty:'Гарантии', ftPay:'Оплата', ftSupport:'Поддержка',
     wishAdd:'Добавлено в желаемое', wishDel:'Убрано из желаемого',
     toWish:'В желаемое', inWish:'В желаемом ★', similar:'Похожие товары',
+    navWish:'Избранное', navCart:'Корзина', cartTtl:'Корзина', wishTtl:'Избранное',
+    wishEmpty:'В избранном пусто', wishEmptySub:'Нажимайте на звёздочку у товаров, чтобы сохранить их здесь',
+    cartEmpty:'Корзина пуста', cartEmptySub:'Добавьте товары из каталога — они появятся здесь',
+    summary:'Итого', goodsCount:'Товаров', goodsSum:'Сумма',
+    fee:'Комиссия платёжной системы', toPay:'К оплате', checkout:'Перейти к оплате',
+    continue:'Продолжить покупки', payMore:'и другие',
+    cartAddMsg2:'Добавлено в корзину',
     from:'От', to:'До',
     buyNow:'Купить сейчас', toCart:'Добавить в корзину', inCart:'В корзине',
     guarantee:'Гарантия 30 дней', delivery:'Мгновенная выдача',
@@ -96,7 +106,15 @@ const GS = (() => {
       curNote:'All prices are in USD. Other currencies are for convenience only.',
       showResults:'Show results', ftAbout:'About', ftWarranty:'Warranty', ftPay:'Payment', ftSupport:'Support',
       wishAdd:'Added to wishlist', wishDel:'Removed from wishlist',
+      cartAddMsg:'Added to cart',
       toWish:'Add to wishlist', inWish:'In wishlist ★', similar:'Similar items',
+      navWish:'Wishlist', navCart:'Cart', cartTtl:'Cart', wishTtl:'Wishlist',
+      wishEmpty:'Your wishlist is empty', wishEmptySub:'Tap the star on any item to save it here',
+      cartEmpty:'Your cart is empty', cartEmptySub:'Add items from the catalog — they will appear here',
+      summary:'Summary', goodsCount:'Items', goodsSum:'Subtotal',
+      fee:'Payment processor fee', toPay:'Total', checkout:'Proceed to checkout',
+      continue:'Continue shopping', payMore:'and more',
+      cartAddMsg2:'Added to cart',
       from:'From', to:'To', priceUpTo:'Up to', priceRange:'More than',
       buyNow:'Buy now', toCart:'Add to cart', inCart:'In cart',
       guarantee:'30-day warranty', delivery:'Instant delivery',
@@ -150,6 +168,32 @@ const GS = (() => {
   }
 
   /* ── Wishlist ── */
+  /* ── Cart ── */
+  function cartAdd(id, qty = 1){
+    const item = state.cart.find(c => c.id === id);
+    if (item) item.qty += qty; else state.cart.push({ id, qty });
+    localStorage.setItem('gs-cart', JSON.stringify(state.cart));
+    updateCartPip();
+  }
+  function cartRemove(id){
+    state.cart = state.cart.filter(c => c.id !== id);
+    localStorage.setItem('gs-cart', JSON.stringify(state.cart));
+    updateCartPip();
+  }
+  function cartSetQty(id, qty){
+    const item = state.cart.find(c => c.id === id);
+    if (!item) return;
+    item.qty = Math.max(1, qty);
+    localStorage.setItem('gs-cart', JSON.stringify(state.cart));
+    updateCartPip();
+  }
+  function updateCartPip(){
+    const pip = $('#cartPip');
+    if (!pip) return;
+    const n = state.cart.reduce((s, c) => s + c.qty, 0);
+    pip.textContent = n;
+    pip.toggleAttribute('data-zero', !n);
+  }
   function wishToggle(id, starEl){
     const i = state.wish.indexOf(id);
     const on = i === -1;
@@ -169,16 +213,16 @@ const GS = (() => {
     pip.toggleAttribute('data-zero', !state.wish.length);
   }
   function wishBind(){
+    // capture-phase: срабатывает ДО inline onclick карточек
     document.addEventListener('click', e => {
       const st = e.target.closest('.star');
       if (!st) return;
       e.preventDefault();
       e.stopPropagation();
-      // id берём из ближайшей карточки или data-атрибута
       const holder = st.closest('[data-game-id]');
       const id = holder ? parseInt(holder.dataset.gameId) : null;
       if (id !== null) wishToggle(id, st);
-    });
+    }, true);
     updateWishPip();
     // восстановить звёзды из localStorage
     $$('.star').forEach(st => {
@@ -190,11 +234,120 @@ const GS = (() => {
     });
   }
 
+
+  /* ── Dropdown для валюты и языка ── */
+  const DD_CSS = `
+    .dd{position:relative}
+    .dd__btn{
+      height:44px;padding:0 13px;border-radius:13px;
+      border:1.5px solid var(--line-2);background:var(--paper);
+      display:flex;align-items:center;gap:7px;
+      font-size:13px;font-weight:800;color:var(--ink-2);
+      transition:.18s;
+    }
+    .dd__btn:hover{border-color:var(--lime-deep);color:var(--ink)}
+    .dd__btn .cur-sym{font-size:15px;color:var(--lime-deep)}
+    .dd__btn .car{font-size:9px;color:var(--ink-3);transition:transform .22s}
+    .dd.open .dd__btn .car{transform:rotate(-180deg)}
+    .dd__pop{
+      position:absolute;top:calc(100% + 8px);right:0;z-index:120;
+      min-width:150px;padding:6px;
+      background:var(--paper);border:1px solid var(--line);border-radius:14px;
+      box-shadow:var(--sh-2);
+      opacity:0;pointer-events:none;transform:translateY(-6px);
+      transition:.18s var(--ease);
+    }
+    .dd.open .dd__pop{opacity:1;pointer-events:auto;transform:none}
+    .dd__it{
+      width:100%;text-align:left;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:9.5px 12px;border-radius:9px;
+      font-size:13px;font-weight:700;color:var(--ink-2);
+      transition:.12s;
+    }
+    .dd__it:hover{background:var(--hover-wash);color:var(--ink)}
+    .dd__it.on{color:var(--lime-deep);font-weight:800}
+    .dd__it .tick{opacity:0;color:var(--lime-deep)}
+    .dd__it.on .tick{opacity:1}
+  `;
+
+  function buildDropdowns(){
+    // CSS один раз
+    if (!document.getElementById('dd-css')){
+      const s = document.createElement('style');
+      s.id = 'dd-css';
+      s.textContent = DD_CSS;
+      document.head.appendChild(s);
+    }
+    // Валюта
+    $$('[data-dd="cur"]').forEach(box => {
+      box.innerHTML = `
+        <button class="dd__btn" aria-haspopup="listbox" aria-expanded="false">
+          <span class="cur-sym">${SYM[state.cur]}</span>
+          <span class="dd-label">${state.cur}</span>
+          <span class="car">▼</span>
+        </button>
+        <div class="dd__pop" role="listbox">
+          ${Object.keys(RATES).map(c => `
+            <button class="dd__it ${c === state.cur ? 'on' : ''}" data-cur="${c}">
+              <span>${c === 'USD' ? '$ USD' : c === 'RUB' ? '₽ RUB' : '€ EUR'}</span>
+              <span class="tick">✓</span>
+            </button>`).join('')}
+        </div>`;
+      bindDD(box, 'cur');
+    });
+    // Язык
+    $$('[data-dd="lang"]').forEach(box => {
+      box.innerHTML = `
+        <button class="dd__btn" aria-haspopup="listbox" aria-expanded="false">
+          <span class="dd-label">${state.lang.toUpperCase()}</span>
+          <span class="car">▼</span>
+        </button>
+        <div class="dd__pop" role="listbox">
+          <button class="dd__it ${state.lang === 'ru' ? 'on' : ''}" data-lang="ru"><span>🇷🇺 Русский</span><span class="tick">✓</span></button>
+          <button class="dd__it ${state.lang === 'en' ? 'on' : ''}" data-lang="en"><span>🇬🇧 English</span><span class="tick">✓</span></button>
+        </div>`;
+      bindDD(box, 'lang');
+    });
+  }
+  function bindDD(box, kind){
+    const btn = box.querySelector('.dd__btn');
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      // закрыть другие
+      $$('.dd.open').forEach(d => { if (d !== box) d.classList.remove('open'); });
+      box.classList.toggle('open');
+      btn.setAttribute('aria-expanded', box.classList.contains('open'));
+    });
+    box.querySelectorAll('.dd__it').forEach(it => it.addEventListener('click', () => {
+      box.classList.remove('open');
+      if (kind === 'cur'){
+        state.cur = it.dataset.cur;
+        localStorage.setItem('gs-cur', state.cur);
+        applyCur();
+        buildDropdowns(); // обновить лейбл
+        toast(state.lang === 'ru'
+          ? `Цены показаны в ${state.cur}. Расчёт и оплата — в USD.`
+          : `Prices shown in ${state.cur}. Billing is in USD.`);
+        document.dispatchEvent(new CustomEvent('gs-cur-changed'));
+      } else {
+        state.lang = it.dataset.lang;
+        localStorage.setItem('gs-lang', state.lang);
+        location.reload();
+      }
+    }));
+    document.addEventListener('click', e => {
+      if (!box.contains(e.target)) box.classList.remove('open');
+    });
+  }
+
   /* ── Инициализация общих обработчиков ── */
   function init(){
     applyTheme();
     applyLang();
     wishBind();
+    buildDropdowns();
+    updateCartPip();
 
     $$('[data-set-theme]').forEach(b => b.addEventListener('click', () => {
       state.theme = b.dataset.setTheme;
@@ -254,5 +407,5 @@ const GS = (() => {
     init();
   }
 
-  return { $, $$, lang, L, money, fmt: money, toast, wishToggle, wishBind, state };
+  return { $, $$, lang, L, money, fmt: money, toast, wishToggle, wishBind, cartAdd, cartRemove, cartSetQty, updateCartPip, state };
 })();

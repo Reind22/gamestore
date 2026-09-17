@@ -132,6 +132,19 @@ html[data-theme="dark"] .chip__box{background:var(--paper-2)}
 .chip__n{font-size:11px;font-weight:700;color:var(--ink-3);background:var(--bg);border-radius:99px;padding:2.5px 8px;font-variant-numeric:tabular-nums}
 .chip.on .chip__n{background:rgba(0,210,60,.14);color:var(--lime-deep)}
 .prange{display:flex;align-items:center;gap:7px;padding:6px 4px 10px}
+.pfield{position:relative;flex:1;min-width:0;display:flex;align-items:center}
+.pfield input{width:100%;padding-right:26px}
+.psym{
+  position:absolute;right:11px;pointer-events:none;
+  font-size:12.5px;font-weight:700;color:var(--ink-3);opacity:.55;
+  font-family:'JetBrains Mono';
+}
+.fam.has-sel .fam__btn{color:var(--lime-deep)}
+.fam.has-sel .fam__btn > span:first-child::after{
+  content:'';display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--lime);margin-left:8px;vertical-align:middle;
+  box-shadow:0 0 8px rgba(0,255,0,.7);
+}
 .prange input{flex:1;min-width:0;height:40px;padding:0 12px;border:1.5px solid var(--line-2);border-radius:10px;background:var(--bg);font-size:13px;font-weight:600}
 .prange input:focus{outline:none;border-color:var(--lime-deep);background:#fff}
 html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
@@ -287,22 +300,15 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 14.2A8.6 8.6 0 0 1 9.8 3.4a8.6 8.6 0 1 0 10.8 10.8z"/></svg>
         </button>
       </div>
-      <div class="seg seg--lang" role="group" aria-label="Язык">
-        <button class="seg__btn on" data-set-lang="ru">RU</button>
-        <button class="seg__btn" data-set-lang="en">EN</button>
-      </div>
-      <div class="seg" role="group" aria-label="Валюта">
-        <button class="seg__btn on" data-set-cur="USD">$</button>
-        <button class="seg__btn" data-set-cur="RUB">₽</button>
-        <button class="seg__btn" data-set-cur="EUR">€</button>
-      </div>
+<div class="dd" data-dd="lang"></div>
+<div class="dd" data-dd="cur"></div>
       <button class="knob" id="heartBtn" aria-label="Желаемое">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.5-1.5 2-3.1 2-4.6A4.4 4.4 0 0 0 16.6 5c-1.7 0-3 .9-4.6 2.6C10.4 5.9 9.1 5 7.4 5A4.4 4.4 0 0 0 3 9.4c0 1.5.5 3.1 2 4.6l7 7z"/></svg>
         <span class="pip" id="heartPip" data-zero></span>
       </button>
       <button class="knob" aria-label="Корзина">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9.3" cy="19.8" r="1.5"/><circle cx="17" cy="19.8" r="1.5"/><path d="M3.2 4h2.4l2.2 11.1a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21.3 8H6.1"/></svg>
-        <span class="pip" data-zero>0</span>
+        <span class="pip" id="cartPip" data-zero>0</span>
       </button>
       <button class="btn-go" data-i18n="login">Войти</button>
       <button class="btn-burger" id="burger" aria-label="Фильтры" aria-expanded="false">
@@ -361,9 +367,9 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
       <button class="fam__btn"><span data-i18n="fPrice">Цена</span> <span class="chev">▼</span></button>
       <div class="fam__pan"><div><div class="fam__list">
         <div class="prange">
-          <input type="number" inputmode="numeric" id="pFrom" placeholder="От" data-i18n-ph="from" aria-label="Цена от">
+          <div class="pfield"><input type="number" inputmode="numeric" id="pFrom" placeholder="От" data-i18n-ph="from" aria-label="Цена от"><span class="psym" id="symFrom">$</span></div>
           <span>—</span>
-          <input type="number" inputmode="numeric" id="pTo" placeholder="До" data-i18n-ph="to" aria-label="Цена до">
+          <div class="pfield"><input type="number" inputmode="numeric" id="pTo" placeholder="До" data-i18n-ph="to" aria-label="Цена до"><span class="psym" id="symTo">$</span></div>
         </div>
       </div></div></div>
     </section>
@@ -487,8 +493,25 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
   chipGroup('#fType', 'type', TYPES);
   chipGroup('#fRegion', 'region', REGIONS);
 
-  $('#pFrom').addEventListener('input', () => { F.priceFrom = parseFloat($('#pFrom').value) || null; F.page = 1; render(); });
-  $('#pTo').addEventListener('input',   () => { F.priceTo   = parseFloat($('#pTo').value)   || null; F.page = 1; render(); });
+  const RATES = { USD: 1, RUB: 92.5, EUR: 0.92 };
+  function toUSD(v){ return state.cur === 'USD' ? v : v / RATES[state.cur]; }
+  $('#pFrom').addEventListener('input', () => {
+    const v = parseFloat($('#pFrom').value);
+    F.priceFrom = v !== null && !isNaN(v) ? toUSD(v) : null;
+    F.page = 1; render();
+  });
+  $('#pTo').addEventListener('input', () => {
+    const v = parseFloat($('#pTo').value);
+    F.priceTo = v !== null && !isNaN(v) ? toUSD(v) : null;
+    F.page = 1; render();
+  });
+  // знак валюты в полях и обновление при смене валюты
+  function syncPriceSym(){
+    const sym = state.cur === 'USD' ? '$' : state.cur === 'RUB' ? '₽' : '€';
+    $('#symFrom').textContent = sym;
+    $('#symTo').textContent = sym;
+  }
+  document.addEventListener('gs-cur-changed', () => { syncPriceSym(); });
 
   /* Синхронизация фильтров: сайдбар ↔ клон в мобильном меню */
   function syncClone(){
@@ -605,7 +628,7 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
             <span class="price__now money" data-usd="${g.price}">${fmt(g.price)}</span>
             ${g.oldPrice ? `<span class="price__was"><b>−${Math.round((1 - g.price / g.oldPrice) * 100)}%</b> <span class="money" data-usd="${g.oldPrice}">${fmt(g.oldPrice)}</span></span>` : ''}
           </div>
-          <button class="tocart" aria-label="Добавить в корзину" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button class="tocart" aria-label="Добавить в корзину" data-cart-add="${g.id}" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
         </div>
       </div>
     </article>`;
@@ -681,6 +704,7 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
   const refreshCounts = () => {
     $$('#rail .fam').forEach(f => {
       const n = f.querySelectorAll('.chip.on').length;
+      f.classList.toggle('has-sel', n > 0);
       let dot = f.querySelector('.fam__btn .dot');
       if (n > 0 && !dot){
         dot = document.createElement('span');
@@ -693,6 +717,16 @@ html[data-theme="dark"] .prange input:focus{background:var(--paper-2)}
   const origObserver = new MutationObserver(refreshCounts);
   origObserver.observe($('#rail'), { subtree: true, attributes: true, attributeFilter: ['class'] });
 
+  /* Плюс → корзина */
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-cart-add]');
+    if (!btn) return;
+    e.preventDefault(); e.stopPropagation();
+    GS.cartAdd(parseInt(btn.dataset.cartAdd));
+    toast(lang() === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
+  }, true);
+
+  syncPriceSym();
   render();
 })();
 </script>

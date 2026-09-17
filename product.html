@@ -385,22 +385,15 @@ html[data-theme="dark"] .btn-wish.on{background:#2A2510}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 14.2A8.6 8.6 0 0 1 9.8 3.4a8.6 8.6 0 1 0 10.8 10.8z"/></svg>
         </button>
       </div>
-      <div class="seg seg--lang" role="group" aria-label="Язык">
-        <button class="seg__btn on" data-set-lang="ru">RU</button>
-        <button class="seg__btn" data-set-lang="en">EN</button>
-      </div>
-      <div class="seg" role="group" aria-label="Валюта">
-        <button class="seg__btn on" data-set-cur="USD">$</button>
-        <button class="seg__btn" data-set-cur="RUB">₽</button>
-        <button class="seg__btn" data-set-cur="EUR">€</button>
-      </div>
+<div class="dd" data-dd="lang"></div>
+<div class="dd" data-dd="cur"></div>
       <button class="knob" aria-label="Желаемое">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.5-1.5 2-3.1 2-4.6A4.4 4.4 0 0 0 16.6 5c-1.7 0-3 .9-4.6 2.6C10.4 5.9 9.1 5 7.4 5A4.4 4.4 0 0 0 3 9.4c0 1.5.5 3.1 2 4.6l7 7z"/></svg>
         <span class="pip" id="heartPip" data-zero></span>
       </button>
       <button class="knob" aria-label="Корзина">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9.3" cy="19.8" r="1.5"/><circle cx="17" cy="19.8" r="1.5"/><path d="M3.2 4h2.4l2.2 11.1a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.6L21.3 8H6.1"/></svg>
-        <span class="pip" data-zero>0</span>
+        <span class="pip" id="cartPip" data-zero>0</span>
       </button>
       <button class="btn-go" data-i18n="login">Войти</button>
       <button class="btn-burger" id="burger" aria-expanded="false">
@@ -517,7 +510,7 @@ html[data-theme="dark"] .btn-wish.on{background:#2A2510}
         <div class="item__sub">${s.short[lang()]}</div>
         <div class="item__buy">
           <span class="price__now money" data-usd="${s.price}">${fmt(s.price)}</span>
-          <button class="tocart" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button class="tocart" data-cart-add="${s.id}" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
         </div>
       </div>
     </article>`;
@@ -649,8 +642,18 @@ html[data-theme="dark"] .btn-wish.on{background:#2A2510}
 
   /* ── Купить (демо) ── */
   $('#buyBtn').addEventListener('click', () => {
-    toast(lang() === 'ru' ? 'Демо: здесь будет checkout' : 'Demo: checkout goes here');
+    GS.cartAdd(g.id);
+    toast(lang() === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
   });
+
+  /* Плюс → корзина (похожие) */
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-cart-add]');
+    if (!btn) return;
+    e.preventDefault(); e.stopPropagation();
+    GS.cartAdd(parseInt(btn.dataset.cartAdd));
+    toast(lang() === 'ru' ? 'Добавлено в корзину' : 'Added to cart');
+  }, true);
 
   /* playbtn */
   $('.playbtn', page)?.addEventListener('click', () => {
